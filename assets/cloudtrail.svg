@@ -1,0 +1,43 @@
+<svg viewBox="0 0 800 140" xmlns="http://www.w3.org/2000/svg" width="800" height="140">
+  <rect width="800" height="140" fill="#0d1117" rx="12"/>
+  <text x="400" y="22" text-anchor="middle" fill="#ff9900" font-family="monospace" font-size="12" font-weight="bold">HOW CLOUDTRAIL WORKS</text>
+
+  <!-- Step boxes -->
+  <rect x="20" y="35" width="130" height="55" rx="8" fill="#1a2a3a" stroke="#ff9900" stroke-width="1.5"/>
+  <text x="85" y="58" text-anchor="middle" fill="#ff9900" font-family="monospace" font-size="10" font-weight="bold">API Call Made</text>
+  <text x="85" y="73" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">Someone does something</text>
+  <text x="85" y="83" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">in your account</text>
+
+  <!-- Arrow animated -->
+  <line x1="152" y1="62" x2="198" y2="62" stroke="#ff9900" stroke-width="2" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" values="0;-8" dur="0.5s" repeatCount="indefinite"/>
+  </line>
+  <polygon points="198,58 208,62 198,66" fill="#ff9900"/>
+
+  <rect x="210" y="35" width="130" height="55" rx="8" fill="#1a2a3a" stroke="#ff9900" stroke-width="1.5"/>
+  <text x="275" y="55" text-anchor="middle" fill="#ff9900" font-family="monospace" font-size="10" font-weight="bold">CloudTrail</text>
+  <text x="275" y="70" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">Records who did what</text>
+  <text x="275" y="83" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">when and from where</text>
+
+  <line x1="342" y1="62" x2="388" y2="62" stroke="#ff9900" stroke-width="2" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" values="0;-8" dur="0.5s" repeatCount="indefinite"/>
+  </line>
+  <polygon points="388,58 398,62 388,66" fill="#ff9900"/>
+
+  <rect x="400" y="35" width="130" height="55" rx="8" fill="#0a1a0a" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="465" y="55" text-anchor="middle" fill="#00ff41" font-family="monospace" font-size="10" font-weight="bold">S3 Storage</text>
+  <text x="465" y="70" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">Logs stored safely</text>
+  <text x="465" y="83" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">for 90+ days</text>
+
+  <line x1="532" y1="62" x2="578" y2="62" stroke="#00ff41" stroke-width="2" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" values="0;-8" dur="0.5s" repeatCount="indefinite"/>
+  </line>
+  <polygon points="578,58 588,62 578,66" fill="#00ff41"/>
+
+  <rect x="590" y="35" width="190" height="55" rx="8" fill="#0a1a0a" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="685" y="55" text-anchor="middle" fill="#00ff41" font-family="monospace" font-size="10" font-weight="bold">Investigation Ready</text>
+  <text x="685" y="70" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">Who deleted that S3 bucket?</text>
+  <text x="685" y="83" text-anchor="middle" fill="#888" font-family="monospace" font-size="8">Who changed the IAM policy?</text>
+
+  <text x="400" y="120" text-anchor="middle" fill="#ff4444" font-family="monospace" font-size="10">If CloudTrail is OFF: no record exists. You cannot investigate anything.</text>
+</svg>

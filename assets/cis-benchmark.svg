@@ -1,0 +1,36 @@
+<svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" width="800" height="220">
+  <rect width="800" height="220" fill="#0d1117" rx="12"/>
+  <text x="400" y="28" text-anchor="middle" fill="#ff9900" font-family="monospace" font-size="14" font-weight="bold">CIS AWS FOUNDATIONS BENCHMARK</text>
+
+  <!-- Level 1 -->
+  <rect x="30" y="45" width="355" height="160" rx="10" fill="#0a1a0a" stroke="#00ff41" stroke-width="1.5"/>
+  <text x="207" y="68" text-anchor="middle" fill="#00ff41" font-family="monospace" font-size="12" font-weight="bold">LEVEL 1 — Essential baseline</text>
+  <text x="207" y="83" text-anchor="middle" fill="#555" font-family="monospace" font-size="9">Every AWS account must pass all of these</text>
+
+  <text x="50" y="105" fill="#00ff41" font-family="monospace" font-size="11">✓  MFA on root account</text>
+  <text x="50" y="122" fill="#00ff41" font-family="monospace" font-size="11">✓  No root access keys</text>
+  <text x="50" y="139" fill="#00ff41" font-family="monospace" font-size="11">✓  CloudTrail in all regions</text>
+  <text x="50" y="156" fill="#00ff41" font-family="monospace" font-size="11">✓  No public S3 buckets</text>
+  <text x="50" y="173" fill="#00ff41" font-family="monospace" font-size="11">✓  No SSH open to 0.0.0.0/0</text>
+  <text x="50" y="190" fill="#00ff41" font-family="monospace" font-size="11">✓  Rotate access keys every 90 days</text>
+
+  <!-- Level 2 -->
+  <rect x="415" y="45" width="355" height="160" rx="10" fill="#0a0a1a" stroke="#4488ff" stroke-width="1.5"/>
+  <text x="593" y="68" text-anchor="middle" fill="#4488ff" font-family="monospace" font-size="12" font-weight="bold">LEVEL 2 — Advanced controls</text>
+  <text x="593" y="83" text-anchor="middle" fill="#555" font-family="monospace" font-size="9">For stricter security requirements</text>
+
+  <text x="435" y="105" fill="#4488ff" font-family="monospace" font-size="11">+  AWS Config enabled</text>
+  <text x="435" y="122" fill="#4488ff" font-family="monospace" font-size="11">+  VPC flow logs active</text>
+  <text x="435" y="139" fill="#4488ff" font-family="monospace" font-size="11">+  GuardDuty enabled</text>
+  <text x="435" y="156" fill="#4488ff" font-family="monospace" font-size="11">+  IAM Access Analyser</text>
+  <text x="435" y="173" fill="#4488ff" font-family="monospace" font-size="11">+  CloudWatch alarms on changes</text>
+  <text x="435" y="190" fill="#4488ff" font-family="monospace" font-size="11">+  No default VPCs in any region</text>
+
+  <!-- Animated pulse on L1 -->
+  <rect x="30" y="45" width="355" height="160" rx="10" fill="none" stroke="#00ff41" stroke-width="1">
+    <animate attributeName="stroke-opacity" values="0;0.5;0" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-width" values="1;4;1" dur="3s" repeatCount="indefinite"/>
+  </rect>
+
+  <text x="207" y="215" text-anchor="middle" fill="#555" font-family="monospace" font-size="9">This project covers Level 1 checks</text>
+</svg>

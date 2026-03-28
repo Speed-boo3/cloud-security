@@ -1,0 +1,64 @@
+<svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" width="800" height="340">
+  <defs>
+    <linearGradient id="awsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1a3a"/>
+      <stop offset="100%" style="stop-color:#1a3a6a"/>
+    </linearGradient>
+    <linearGradient id="youBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a0a0a"/>
+      <stop offset="100%" style="stop-color:#6a1a1a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="340" fill="#0d1117" rx="12"/>
+
+  <text x="400" y="32" text-anchor="middle" fill="#ff9900" font-family="monospace" font-size="16" font-weight="bold" filter="url(#glow)">THE SHARED RESPONSIBILITY MODEL</text>
+
+  <!-- AWS Box -->
+  <rect x="30" y="55" width="355" height="265" rx="10" fill="url(#awsBg)" stroke="#ff9900" stroke-width="1.5">
+    <animate attributeName="stroke-opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="207" y="82" text-anchor="middle" fill="#ff9900" font-family="monospace" font-size="13" font-weight="bold">AWS RESPONSIBILITY</text>
+  <text x="207" y="98" text-anchor="middle" fill="#888" font-family="monospace" font-size="10">"Security OF the cloud"</text>
+
+  <circle cx="60" cy="125" r="5" fill="#ff9900" opacity="0.8"/>
+  <text x="75" y="129" fill="#cccccc" font-family="monospace" font-size="12">Physical data centres</text>
+  <circle cx="60" cy="155" r="5" fill="#ff9900" opacity="0.8"/>
+  <text x="75" y="159" fill="#cccccc" font-family="monospace" font-size="12">Network infrastructure</text>
+  <circle cx="60" cy="185" r="5" fill="#ff9900" opacity="0.8"/>
+  <text x="75" y="189" fill="#cccccc" font-family="monospace" font-size="12">Hypervisor and hardware</text>
+  <circle cx="60" cy="215" r="5" fill="#ff9900" opacity="0.8"/>
+  <text x="75" y="219" fill="#cccccc" font-family="monospace" font-size="12">Global network backbone</text>
+  <circle cx="60" cy="245" r="5" fill="#ff9900" opacity="0.8"/>
+  <text x="75" y="249" fill="#cccccc" font-family="monospace" font-size="12">Managed service security</text>
+  <circle cx="60" cy="275" r="5" fill="#ff9900" opacity="0.8"/>
+  <text x="75" y="279" fill="#cccccc" font-family="monospace" font-size="12">Availability zones</text>
+
+  <!-- You Box -->
+  <rect x="415" y="55" width="355" height="265" rx="10" fill="url(#youBg)" stroke="#ff4444" stroke-width="1.5">
+    <animate attributeName="stroke-opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+  </rect>
+  <text x="593" y="82" text-anchor="middle" fill="#ff4444" font-family="monospace" font-size="13" font-weight="bold">YOUR RESPONSIBILITY</text>
+  <text x="593" y="98" text-anchor="middle" fill="#888" font-family="monospace" font-size="10">"Security IN the cloud"</text>
+
+  <circle cx="445" cy="125" r="5" fill="#ff4444" opacity="0.8"/>
+  <text x="460" y="129" fill="#cccccc" font-family="monospace" font-size="12">What you store in S3</text>
+  <circle cx="445" cy="155" r="5" fill="#ff4444" opacity="0.8"/>
+  <text x="460" y="159" fill="#cccccc" font-family="monospace" font-size="12">Who has IAM access</text>
+  <circle cx="445" cy="185" r="5" fill="#ff4444" opacity="0.8"/>
+  <text x="460" y="189" fill="#cccccc" font-family="monospace" font-size="12">Security group rules</text>
+  <circle cx="445" cy="215" r="5" fill="#ff4444" opacity="0.8"/>
+  <text x="460" y="219" fill="#cccccc" font-family="monospace" font-size="12">Whether logging is on</text>
+  <circle cx="445" cy="245" r="5" fill="#ff4444" opacity="0.8"/>
+  <text x="460" y="249" fill="#cccccc" font-family="monospace" font-size="12">Your application code</text>
+  <circle cx="445" cy="275" r="5" fill="#ff4444" opacity="0.8"/>
+  <text x="460" y="279" fill="#cccccc" font-family="monospace" font-size="12">Data encryption choices</text>
+
+  <!-- Most breaches label -->
+  <text x="593" y="310" text-anchor="middle" fill="#ff4444" font-family="monospace" font-size="10">Most breaches happen here</text>
+  <text x="207" y="310" text-anchor="middle" fill="#888" font-family="monospace" font-size="10">AWS has never been hacked</text>
+</svg>

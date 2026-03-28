@@ -17,41 +17,29 @@
 
 ## Who this is for
 
-This project is for students learning cybersecurity who want to understand what cloud security work actually looks like. Cloud security is one of the fastest growing areas in the industry right now. Almost every organisation has moved at least part of their infrastructure to AWS, Azure or GCP, and most of them have misconfigurations they do not know about.
+This project is for students learning cybersecurity who want to understand what cloud security work actually looks like in practice.
 
-This project teaches you how to find those misconfigurations, why they are dangerous and how to fix them.
+Cloud security is one of the fastest growing areas in the industry. Almost every organisation has moved infrastructure to AWS, Azure or GCP, and most of them have misconfigurations they do not know about. The biggest data breaches in recent years were not caused by sophisticated exploits. They were caused by a public S3 bucket, an IAM user with admin access that should not have it, or a database port open to the entire internet.
+
+This project finds exactly those things.
 
 ---
 
-## Why cloud security matters
+## The shared responsibility model
 
-The biggest data breaches in recent years were not caused by sophisticated zero-day exploits. They were caused by simple misconfigurations.
+The most important concept in cloud security. AWS secures the infrastructure. You are responsible for everything you build on top of it.
 
-A public S3 bucket. An IAM user with admin access that should not have it. A database port open to the entire internet. A CloudTrail trail that was accidentally disabled six months ago and nobody noticed.
+<img src="assets/shared-responsibility.svg" width="100%"/>
 
-These are the things this project finds.
+Most cloud breaches happen on the right side of that diagram. Things you configured. Things you forgot to lock down. This is what cloud security work is about.
 
-```mermaid
-flowchart TD
-    A[AWS Account] --> B[S3 Scanner]
-    A --> C[IAM Analyser]
-    A --> D[Security Group Scanner]
-    A --> E[CloudTrail Check]
-    B --> F[Findings]
-    C --> F
-    D --> F
-    E --> F
-    F --> G{Severity?}
-    G -->|Critical| H[Fix immediately]
-    G -->|High| I[Fix within 30 days]
-    G -->|Medium| J[Fix within 90 days]
+---
 
-    style A fill:#1a3a5a,stroke:#ff9900,color:#ffffff
-    style F fill:#5a1a1a,stroke:#ff4444,color:#ffffff
-    style H fill:#cc2200,stroke:#ff0000,color:#ffffff
-    style I fill:#cc4400,stroke:#ff6600,color:#ffffff
-    style J fill:#bb7700,stroke:#ffaa00,color:#ffffff
-```
+## How the scanners work
+
+<img src="assets/scan-pipeline.svg" width="100%"/>
+
+Four scanners run against your AWS account and produce a unified findings report, sorted by severity.
 
 ---
 
@@ -59,12 +47,23 @@ flowchart TD
 
 ### S3 buckets
 
-S3 is AWS object storage. It is used to store everything from application assets to database backups. A misconfigured S3 bucket is one of the most common causes of data breaches.
+S3 is AWS object storage. A misconfigured bucket is one of the most common causes of data breaches. The scanner checks each bucket for four things:
+
+```
+Block Public Access       is the bucket accidentally open to the internet?
+Default encryption        are files encrypted when stored?
+Versioning                can deleted files be recovered?
+Access logging            is there an audit trail?
+```
+
+```bash
+python aws/s3/s3_scanner.py --region eu-west-1
+```
 
 ```
 S3 Security Scan
 ============================================================
-Issues found: 3
+Issues found: 2
 
 [CRITICAL] company-backups
   Finding : Block Public Access is not fully enabled
@@ -74,26 +73,16 @@ Issues found: 3
 [HIGH] app-uploads
   Finding : Default encryption is not configured
   Risk    : Objects stored in this bucket are not encrypted at rest
-  Fix     : Enable AES-256 or AWS KMS encryption on the bucket
-
-[MEDIUM] dev-logs
-  Finding : Access logging is not enabled
-  Risk    : No audit trail of who accessed or modified objects in this bucket
-  Fix     : Enable server access logging
-```
-
-What the scanner checks:
-
-```
-Block Public Access       is the bucket accidentally open to the internet?
-Default encryption        are files encrypted when stored?
-Versioning                can deleted files be recovered?
-Access logging            is there an audit trail?
+  Fix     : Enable AES-256 or AWS KMS encryption
 ```
 
 ### IAM users and policies
 
-IAM (Identity and Access Management) controls who can do what in your AWS account. The most common problem is users having far more permissions than they need.
+IAM controls who can do what in your AWS account. The principle of least privilege means every user should have only the permissions they need, nothing more.
+
+```bash
+python aws/iam/iam_analyser.py
+```
 
 ```
 IAM Security Analysis
@@ -111,103 +100,118 @@ Issues found: 2
   Fix     : Enable MFA for this user immediately
 ```
 
-The principle of least privilege means every user should only have exactly the permissions they need, nothing more.
-
 ### Security groups
 
-Security groups are AWS firewalls. They control what network traffic is allowed in and out of your resources. Opening dangerous ports to the entire internet is a common mistake.
+Security groups are AWS firewalls. Opening dangerous ports to the entire internet is a mistake that attackers scan for constantly.
+
+```bash
+python aws/network/sg_scanner.py --region eu-west-1
+```
 
 ```
 Security Group Scan
 ============================================================
-Issues found: 2
+Issues found: 1
 
 [CRITICAL] sg-web-server
   Finding : Port 22 (SSH) is open to the entire internet
-  Risk    : SSH is exposed to 0.0.0.0/0 anyone can attempt connections
-  Fix     : Restrict SSH to specific IP addresses or a VPN
-
-[HIGH] sg-database
-  Finding : Port 3306 (MySQL) is open to the entire internet
-  Risk    : Database is directly accessible from anywhere on the internet
-  Fix     : Remove the public rule and allow access only from application servers
+  Risk    : SSH is exposed to 0.0.0.0/0, anyone can attempt connections
+  Fix     : Restrict SSH to specific IP addresses or a VPN only
 ```
 
-### CloudTrail logging
+Ports the scanner flags and why:
 
-CloudTrail records every API call made in your AWS account. It is your audit trail. If logging is disabled, you have no way to investigate an incident or prove that something happened.
+```
+Port 22    SSH         brute force target, must never be public
+Port 3389  RDP         multiple critical CVEs, constant attack target
+Port 3306  MySQL       databases must never be directly internet-facing
+Port 5432  PostgreSQL  same reason as MySQL
+Port 6379  Redis       often ships with no authentication by default
+Port 27017 MongoDB     thousands of databases wiped by attackers this way
+Port 21    FTP         credentials sent in plaintext
+Port 23    Telnet      everything unencrypted, replaced by SSH in the 1990s
+Port 8080  HTTP Alt    dev servers often run here without encryption
+```
 
-```mermaid
-flowchart LR
-    A[API call made] --> B{CloudTrail enabled?}
-    B -->|Yes| C[Event logged]
-    B -->|No| D[No record exists]
-    C --> E[Stored in S3]
-    E --> F[Available for investigation]
-    D --> G[Cannot investigate incidents]
+### CloudTrail
 
-    style B fill:#1a3a5a,stroke:#ff9900,color:#ffffff
-    style C fill:#007722,stroke:#00ff41,color:#ffffff
-    style D fill:#cc2200,stroke:#ff0000,color:#ffffff
-    style G fill:#cc2200,stroke:#ff0000,color:#ffffff
+CloudTrail records every API call in your account. It is your audit trail. Without it, you cannot investigate incidents.
+
+<img src="assets/cloudtrail.svg" width="100%"/>
+
+```bash
+python aws/logging/cloudtrail_check.py --region eu-west-1
 ```
 
 ---
 
 ## The CIS AWS Foundations Benchmark
 
-The Center for Internet Security (CIS) publishes a benchmark specifically for AWS. It contains over 50 specific security checks, each with a pass/fail criteria and remediation steps. This is the standard that security teams and auditors use to assess AWS environments.
+The CIS benchmark is the standard that security teams and auditors use to assess AWS environments. This project checks the most critical Level 1 controls.
 
-```mermaid
-flowchart LR
-    subgraph L1[Level 1 - Essential]
-        A[MFA on root]
-        B[No public S3]
-        C[CloudTrail enabled]
-        D[No unused credentials]
-    end
-    subgraph L2[Level 2 - Advanced]
-        E[Config enabled]
-        F[VPC flow logs]
-        G[Access analyser]
-        H[GuardDuty enabled]
-    end
-
-    style L1 fill:#1a5a2a,stroke:#00ff41,color:#ffffff
-    style L2 fill:#1a2a5a,stroke:#4488ff,color:#ffffff
-```
-
-Level 1 controls are the baseline. Every AWS account should pass all of them. This project checks the most critical Level 1 controls.
+<img src="assets/cis-benchmark.svg" width="100%"/>
 
 The full benchmark is free at [cisecurity.org](https://www.cisecurity.org/benchmark/amazon_web_services).
 
 ---
 
-## The shared responsibility model
+## Run everything at once
 
-One of the most important concepts in cloud security is understanding what AWS is responsible for and what you are responsible for.
-
-```mermaid
-flowchart TB
-    subgraph AWS[AWS is responsible for]
-        A1[Physical hardware]
-        A2[Network infrastructure]
-        A3[Hypervisor and virtualisation]
-        A4[Managed service security]
-    end
-    subgraph YOU[You are responsible for]
-        B1[What you put in S3]
-        B2[Who has IAM access]
-        B3[How you configure security groups]
-        B4[Whether logging is enabled]
-        B5[Your application code]
-    end
-
-    style AWS fill:#1a3a5a,stroke:#ff9900,color:#ffffff
-    style YOU fill:#5a1a1a,stroke:#ff4444,color:#ffffff
+```bash
+cd aws
+python run_all.py --region eu-west-1 --output results.json
 ```
 
-AWS secures the infrastructure. You are responsible for everything you build on top of it. Most cloud breaches happen because customers misconfigured their own resources, not because AWS was hacked.
+```
+============================================================
+  AWS CLOUD SECURITY SCAN
+============================================================
+
+[1/4] Scanning S3 buckets...
+[2/4] Analysing IAM users...
+[3/4] Scanning security groups...
+[4/4] Checking CloudTrail...
+
+============================================================
+  SUMMARY
+============================================================
+  Total issues : 7
+  Critical     : 2
+  High         : 3
+  Medium       : 2
+============================================================
+```
+
+---
+
+## What cloud security jobs look like
+
+```
+Cloud Security Engineer       builds and maintains security controls in cloud environments
+Security Architect (Cloud)    designs secure cloud architectures from scratch
+Cloud GRC Analyst             assesses cloud compliance against CIS and ISO 27001
+DevSecOps Engineer            integrates security into cloud deployment pipelines
+Penetration Tester (Cloud)    tests cloud environments for vulnerabilities
+```
+
+The skills this project demonstrates are directly relevant to all of them. Understanding IAM, knowing why S3 buckets get misconfigured, reading security group rules and audit trails are exactly what interviewers ask about.
+
+---
+
+## Setup
+
+You need an AWS account. The AWS Free Tier is enough to run all these scanners. Sign up at [aws.amazon.com/free](https://aws.amazon.com/free/).
+
+```bash
+pip install awscli
+aws configure
+```
+
+```bash
+git clone https://github.com/Speed-boo3/cloud-security.git
+cd cloud-security
+pip install -r requirements.txt
+```
 
 ---
 
@@ -217,83 +221,34 @@ AWS secures the infrastructure. You are responsible for everything you build on 
 cloud-security/
 ├── aws/
 │   ├── s3/
-│   │   └── s3_scanner.py       <- checks S3 bucket misconfigurations
+│   │   └── s3_scanner.py         <- public buckets, encryption, versioning, logging
 │   ├── iam/
-│   │   └── iam_analyser.py     <- checks IAM users and policies
+│   │   └── iam_analyser.py       <- overprivileged users, missing MFA, old keys
 │   ├── network/
-│   │   └── sg_scanner.py       <- checks security group rules
+│   │   └── sg_scanner.py         <- dangerous ports open to the internet
 │   ├── logging/
-│   │   └── cloudtrail_check.py <- checks CloudTrail configuration
-│   └── run_all.py              <- runs all scanners at once
+│   │   └── cloudtrail_check.py   <- audit logging configuration
+│   └── run_all.py                <- runs all four scanners
+├── assets/                       <- SVG diagrams used in README
 ├── frameworks/
-│   └── cis-aws-benchmark.md    <- CIS AWS Foundations Benchmark explained
+│   └── cis-aws-benchmark.md      <- CIS AWS Foundations Benchmark explained
 ├── templates/
-│   └── remediation-report.md   <- template for documenting findings
-├── resources/
-│   └── README.md               <- free learning resources for cloud security
-├── tests/
-└── requirements.txt
+│   └── remediation-report.md     <- template for documenting findings
+└── resources/
+    └── README.md                 <- free learning resources for cloud security
 ```
-
----
-
-## Setup
-
-You need an AWS account. AWS Free Tier is enough to run these scanners against your own account. Sign up at [aws.amazon.com](https://aws.amazon.com).
-
-Install the AWS CLI and configure credentials:
-
-```bash
-pip install awscli
-aws configure
-```
-
-Clone and install:
-
-```bash
-git clone https://github.com/Speed-boo3/cloud-security.git
-cd cloud-security
-pip install -r requirements.txt
-```
-
-Run a scan:
-
-```bash
-cd aws
-python s3/s3_scanner.py --region eu-west-1
-python iam/iam_analyser.py
-python network/sg_scanner.py --region eu-west-1
-python logging/cloudtrail_check.py --region eu-west-1
-python run_all.py --output results.json
-```
-
----
-
-## What cloud security jobs look like
-
-Cloud security roles appear under several job titles:
-
-```
-Cloud Security Engineer       builds and maintains security controls in cloud environments
-Security Architect (Cloud)    designs secure cloud architectures from scratch
-Cloud GRC Analyst             assesses compliance of cloud environments against frameworks
-DevSecOps Engineer            integrates security into cloud deployment pipelines
-Penetration Tester (Cloud)    tests cloud environments for vulnerabilities
-```
-
-The skills this project demonstrates are directly relevant to all of them. Understanding IAM, knowing why S3 buckets get misconfigured, being able to read and act on security group rules and audit trails are all things interviewers will ask about.
 
 ---
 
 ## Free resources
 
-The `resources/` folder has a full list. Key ones:
+Everything in `resources/README.md` is free.
 
 - [AWS Security Best Practices](https://aws.amazon.com/security/security-resources/)
 - [CIS AWS Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon_web_services)
 - [AWS Free Tier](https://aws.amazon.com/free/) for hands-on practice
-- [AWS Security documentation](https://docs.aws.amazon.com/security/)
-- [Cloud Security Alliance](https://cloudsecurityalliance.org/research/guidance)
+- [AWS Security Fundamentals (free course)](https://explore.skillbuilder.aws/learn/course/48)
+- [Cloud Security Alliance guidance](https://cloudsecurityalliance.org/research/guidance)
 
 <div align="center">
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:ff9900,50:1a1a3a,100:0d1117&height=100&section=footer&text=Scan.%20Find.%20Fix.&fontSize=16&fontColor=ff9900&animation=twinkling"/>
