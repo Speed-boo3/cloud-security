@@ -15,6 +15,18 @@
 
 ---
 
+## Interactive learning site
+
+<div align="center">
+
+[![Open the interactive guide](https://img.shields.io/badge/Interactive%20Guide-Learn%20cloud%20security-ff9900?style=for-the-badge&labelColor=0d1117)](https://speed-boo3.github.io/cloud-security/explain/)
+
+</div>
+
+Six interactive modules covering everything from scratch. Try the live scanner simulation, explore IAM users and see exactly why each misconfiguration is dangerous.
+
+---
+
 ## Who this is for
 
 This project is for students learning cybersecurity who want to understand what cloud security work actually looks like in practice.
