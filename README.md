@@ -210,6 +210,42 @@ The skills this project demonstrates are directly relevant to all of them. Under
 
 ---
 
+## Try it now — no AWS account needed
+
+A full demo mode ships with the project. It runs realistic mock findings so you can see exactly what the scanner produces without any AWS credentials.
+
+```bash
+git clone https://github.com/Speed-boo3/cloud-security.git
+cd cloud-security
+pip install -r requirements.txt
+python aws/demo_mode.py
+```
+
+```
+================================================================
+  AWS CLOUD SECURITY SCAN — DEMO MODE
+================================================================
+
+[CRITICAL] company-backups-prod (S3)
+  Finding : Block Public Access is not fully enabled
+  Risk    : Anyone on the internet can read files from this bucket
+  Fix     : Enable all four Block Public Access settings immediately
+
+[CRITICAL] web-server-sg
+  Finding : Port 22 (SSH) is open to 0.0.0.0/0
+  Risk    : SSH exposed to every IP. Constant brute force target
+  Fix     : Restrict SSH to your VPN CIDR. Never expose publicly
+
+[HIGH] developer1 (IAM)
+  Finding : User has AdministratorAccess policy attached
+  Risk    : Full account takeover if credentials are compromised
+  Fix     : Replace with a scoped policy for this user's actual role
+
+Summary: 8 issues — 2 Critical, 3 High, 3 Medium
+```
+
+---
+
 ## Setup
 
 You need an AWS account. The AWS Free Tier is enough to run all these scanners. Sign up at [aws.amazon.com/free](https://aws.amazon.com/free/).
