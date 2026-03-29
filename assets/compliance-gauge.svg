@@ -1,0 +1,64 @@
+<svg viewBox="0 0 800 140" xmlns="http://www.w3.org/2000/svg" width="800" height="140">
+  <rect width="800" height="140" fill="#060a10" rx="12"/>
+  <text x="400" y="22" text-anchor="middle" fill="#ff9900" font-family="JetBrains Mono,monospace" font-size="10" letter-spacing="2" font-weight="700">CIS AWS LEVEL 1 — COMPLIANCE SCORE</text>
+
+  <!-- Category bars -->
+  <!-- IAM -->
+  <text x="20" y="46" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">Identity &amp; Access</text>
+  <rect x="168" y="34" width="340" height="16" rx="4" fill="#111827"/>
+  <rect x="168" y="34" width="0" height="16" rx="4" fill="#e53935">
+    <animate attributeName="width" values="0;136" dur="1.8s" fill="freeze" calcMode="ease-out"/>
+  </rect>
+  <text x="518" y="46" fill="#e53935" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" opacity="0">
+    40% — 2/5 passing
+    <animate attributeName="opacity" values="0;1" begin="1.8s" dur="0.3s" fill="freeze"/>
+  </text>
+
+  <!-- Logging -->
+  <text x="20" y="72" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">Logging</text>
+  <rect x="168" y="60" width="340" height="16" rx="4" fill="#111827"/>
+  <rect x="168" y="60" width="0" height="16" rx="4" fill="#fbbf24">
+    <animate attributeName="width" values="0;228" dur="1.8s" begin="0.2s" fill="freeze" calcMode="ease-out"/>
+  </rect>
+  <text x="518" y="72" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" opacity="0">
+    67% — 2/3 passing
+    <animate attributeName="opacity" values="0;1" begin="2s" dur="0.3s" fill="freeze"/>
+  </text>
+
+  <!-- Storage -->
+  <text x="20" y="98" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">Storage</text>
+  <rect x="168" y="86" width="340" height="16" rx="4" fill="#111827"/>
+  <rect x="168" y="86" width="0" height="16" rx="4" fill="#00e676">
+    <animate attributeName="width" values="0;340" dur="1.8s" begin="0.4s" fill="freeze" calcMode="ease-out"/>
+  </rect>
+  <text x="518" y="98" fill="#00e676" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" opacity="0">
+    100% — 3/3 passing
+    <animate attributeName="opacity" values="0;1" begin="2.2s" dur="0.3s" fill="freeze"/>
+  </text>
+
+  <!-- Networking -->
+  <text x="20" y="124" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="10">Networking</text>
+  <rect x="168" y="112" width="340" height="16" rx="4" fill="#111827"/>
+  <rect x="168" y="112" width="0" height="16" rx="4" fill="#ff6d00">
+    <animate attributeName="width" values="0;227" dur="1.8s" begin="0.6s" fill="freeze" calcMode="ease-out"/>
+  </rect>
+  <text x="518" y="124" fill="#ff6d00" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" opacity="0">
+    67% — 2/3 passing
+    <animate attributeName="opacity" values="0;1" begin="2.4s" dur="0.3s" fill="freeze"/>
+  </text>
+
+  <!-- Overall score -->
+  <rect x="668" y="30" width="118" height="98" rx="8" fill="#111827" stroke="#1e2d45" stroke-width="1"/>
+  <text x="727" y="68" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="30" font-weight="900" opacity="0">
+    57%
+    <animate attributeName="opacity" values="0;1" begin="2s" dur="0.5s" fill="freeze"/>
+  </text>
+  <text x="727" y="86" text-anchor="middle" fill="#475569" font-family="JetBrains Mono,monospace" font-size="9" opacity="0">
+    OVERALL
+    <animate attributeName="opacity" values="0;1" begin="2s" dur="0.5s" fill="freeze"/>
+  </text>
+  <text x="727" y="112" text-anchor="middle" fill="#475569" font-family="JetBrains Mono,monospace" font-size="8" opacity="0">
+    8/14 controls
+    <animate attributeName="opacity" values="0;1" begin="2s" dur="0.5s" fill="freeze"/>
+  </text>
+</svg>

@@ -1,169 +1,193 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,40:0a1a3a,100:ff9900&height=200&section=header&text=Cloud%20Security&fontSize=55&fontColor=ff9900&animation=fadeIn&fontAlignY=42&desc=AWS%20Misconfiguration%20Scanning%20%7C%20IAM%20Analysis%20%7C%20CIS%20Benchmarks&descAlignY=66&descColor=888888&descSize=14"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:060a10,30:0a1628,100:ff9900&height=220&section=header&text=Cloud%20Security&fontSize=60&fontColor=ff9900&animation=fadeIn&fontAlignY=40&desc=AWS%20Misconfiguration%20Scanning%20%7C%20IAM%20Analysis%20%7C%20CIS%20Benchmark%20Compliance&descAlignY=64&descColor=555555&descSize=14"/>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=15&duration=2800&pause=900&color=FF9900&center=true&vCenter=true&width=650&lines=S3+bucket+misconfiguration+scanning;IAM+user+and+policy+analysis;Security+group+exposure+detection;CloudTrail+logging+verification;Built+for+students+learning+cloud+security"/>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=2500&pause=1000&color=FF9900&center=true&vCenter=true&width=700&lines=S3+bucket+misconfiguration+scanning;IAM+overprivilege+and+MFA+analysis;Security+group+exposure+detection;CIS+AWS+Level+1+compliance+scoring;No+AWS+account+needed+to+try+it"/>
 
 <br/>
 
-![Python](https://img.shields.io/badge/Python-3.8+-0d1117?style=flat-square&logo=python&logoColor=00ff41)
+![Python](https://img.shields.io/badge/Python-3.8+-0d1117?style=flat-square&logo=python&logoColor=ff9900)
 ![AWS](https://img.shields.io/badge/AWS-boto3-0d1117?style=flat-square&logo=amazon-aws&logoColor=ff9900)
+![CIS](https://img.shields.io/badge/CIS-Level%201-0d1117?style=flat-square&logoColor=ff9900)
 ![License](https://img.shields.io/badge/license-MIT-0d1117?style=flat-square)
-![CIS](https://img.shields.io/badge/CIS-AWS%20Benchmark-0d1117?style=flat-square&logoColor=ff9900)
+
+<br/>
+
+[![Interactive guide](https://img.shields.io/badge/Interactive%20Guide%20%E2%86%92-Cloud%20security%20from%20scratch-ff9900?style=for-the-badge&labelColor=0d1117)](https://speed-boo3.github.io/cloud-security/explain/)
 
 </div>
 
 ---
 
-## Interactive learning site
+## What this project is
 
-<div align="center">
+Most cloud data breaches are not caused by sophisticated attacks. They are caused by misconfigurations — a public S3 bucket, an IAM user with admin access, a database port open to the internet, an audit trail that was accidentally disabled.
 
-[![Open the interactive guide](https://img.shields.io/badge/Interactive%20Guide-Learn%20cloud%20security-ff9900?style=for-the-badge&labelColor=0d1117)](https://speed-boo3.github.io/cloud-security/explain/)
-
-</div>
-
-Six interactive modules covering everything from scratch. Try the live scanner simulation, explore IAM users and see exactly why each misconfiguration is dangerous.
+This project finds those misconfigurations automatically. Four scanners, a CIS compliance score calculator, a full demo mode that works without AWS credentials, and an interactive learning site that explains everything from scratch.
 
 ---
 
-## Who this is for
+## Try it now — no AWS account needed
 
-This project is for students learning cybersecurity who want to understand what cloud security work actually looks like in practice.
+```bash
+git clone https://github.com/Speed-boo3/cloud-security.git
+cd cloud-security
+pip install -r requirements.txt
 
-Cloud security is one of the fastest growing areas in the industry. Almost every organisation has moved infrastructure to AWS, Azure or GCP, and most of them have misconfigurations they do not know about. The biggest data breaches in recent years were not caused by sophisticated exploits. They were caused by a public S3 bucket, an IAM user with admin access that should not have it, or a database port open to the entire internet.
-
-This project finds exactly those things.
-
----
-
-## The shared responsibility model
-
-The most important concept in cloud security. AWS secures the infrastructure. You are responsible for everything you build on top of it.
-
-<img src="assets/shared-responsibility.svg" width="100%"/>
-
-Most cloud breaches happen on the right side of that diagram. Things you configured. Things you forgot to lock down. This is what cloud security work is about.
-
----
-
-## How the scanners work
-
-<img src="assets/scan-pipeline.svg" width="100%"/>
-
-Four scanners run against your AWS account and produce a unified findings report, sorted by severity.
-
----
-
-## What gets scanned
-
-### S3 buckets
-
-S3 is AWS object storage. A misconfigured bucket is one of the most common causes of data breaches. The scanner checks each bucket for four things:
-
+python aws/demo_mode.py
+python aws/compliance_score.py --demo
 ```
-Block Public Access       is the bucket accidentally open to the internet?
-Default encryption        are files encrypted when stored?
-Versioning                can deleted files be recovered?
-Access logging            is there an audit trail?
-```
+
+<img src="assets/compliance-gauge.svg" width="100%"/>
+
+---
+
+## The attack surface
+
+<img src="assets/aws-attack-map.svg" width="100%"/>
+
+Every misconfiguration is a door. This project finds the open doors.
+
+---
+
+## The four scanners
+
+### S3 — Storage misconfiguration
+
+S3 is the most common source of cloud data breaches. A single misconfigured bucket can expose millions of records to anyone on the internet.
 
 ```bash
 python aws/s3/s3_scanner.py --region eu-west-1
 ```
 
 ```
-S3 Security Scan
-============================================================
-Issues found: 2
+[CRITICAL]  company-backups-prod
+  Finding  : Block Public Access is not fully enabled
+  Risk     : Anyone on the internet can read files from this bucket
+  Fix      : Enable all four Block Public Access settings immediately
 
-[CRITICAL] company-backups
-  Finding : Block Public Access is not fully enabled
-  Risk    : Anyone on the internet may be able to read files from this bucket
-  Fix     : Enable all four Block Public Access settings immediately
-
-[HIGH] app-uploads
-  Finding : Default encryption is not configured
-  Risk    : Objects stored in this bucket are not encrypted at rest
-  Fix     : Enable AES-256 or AWS KMS encryption
+[HIGH]     app-user-uploads
+  Finding  : Default encryption is not configured
+  Risk     : Objects are not encrypted at rest
+  Fix      : Enable AES-256 or AWS KMS encryption
 ```
 
-### IAM users and policies
+What gets checked on every bucket:
 
-IAM controls who can do what in your AWS account. The principle of least privilege means every user should have only the permissions they need, nothing more.
+```
+Block Public Access    is the bucket accidentally open to the internet?
+Default encryption     are files encrypted when stored?
+Versioning             can deleted files be recovered?
+Access logging         is there an audit trail of who accessed what?
+```
+
+### IAM — Identity and Access Management
+
+IAM controls who can do what in your AWS account. The most common mistake is giving users far more permissions than they need.
 
 ```bash
 python aws/iam/iam_analyser.py
 ```
 
 ```
-IAM Security Analysis
-============================================================
-Issues found: 2
+[HIGH]     developer1
+  Finding  : User has AdministratorAccess policy attached
+  Risk     : Full account takeover if credentials are ever leaked
+  Fix      : Replace with a scoped policy for this user's actual role
 
-[HIGH] developer1
-  Finding : User has overly permissive policy: AdministratorAccess
-  Risk    : If credentials are compromised the attacker gains full account access
-  Fix     : Replace with a scoped policy covering only what this user needs
+[HIGH]     ci-pipeline
+  Finding  : MFA is not enabled
+  Risk     : Account can be taken over with username and password alone
+  Fix      : Enable MFA. For CI/CD consider IAM roles instead of users
 
-[HIGH] ci-pipeline
-  Finding : MFA is not enabled
-  Risk    : Account can be taken over with just a username and password
-  Fix     : Enable MFA for this user immediately
+[MEDIUM]   backup-service
+  Finding  : Access key is 143 days old (threshold: 90 days)
+  Risk     : Old keys increase the window of exposure if ever leaked
+  Fix      : Rotate the key and enforce a 90-day rotation policy
 ```
 
-### Security groups
+### Security Groups — Network exposure
 
-Security groups are AWS firewalls. Opening dangerous ports to the entire internet is a mistake that attackers scan for constantly.
+Security groups are AWS firewalls. Leaving dangerous ports open to the entire internet is one of the most scanned configurations on the internet.
 
 ```bash
 python aws/network/sg_scanner.py --region eu-west-1
 ```
 
 ```
-Security Group Scan
-============================================================
-Issues found: 1
+[CRITICAL]  web-server-sg
+  Finding  : Port 22 (SSH) is open to 0.0.0.0/0
+  Risk     : SSH exposed to every IP. Constant brute force target
+  Fix      : Restrict to VPN CIDR or specific trusted IPs only
 
-[CRITICAL] sg-web-server
-  Finding : Port 22 (SSH) is open to the entire internet
-  Risk    : SSH is exposed to 0.0.0.0/0, anyone can attempt connections
-  Fix     : Restrict SSH to specific IP addresses or a VPN only
+[CRITICAL]  database-sg
+  Finding  : Port 3306 (MySQL) is open to 0.0.0.0/0
+  Risk     : Database directly accessible from the internet
+  Fix      : Allow only from your application server security group
 ```
 
 Ports the scanner flags and why:
 
 ```
-Port 22    SSH         brute force target, must never be public
-Port 3389  RDP         multiple critical CVEs, constant attack target
-Port 3306  MySQL       databases must never be directly internet-facing
-Port 5432  PostgreSQL  same reason as MySQL
-Port 6379  Redis       often ships with no authentication by default
-Port 27017 MongoDB     thousands of databases wiped by attackers this way
-Port 21    FTP         credentials sent in plaintext
-Port 23    Telnet      everything unencrypted, replaced by SSH in the 1990s
-Port 8080  HTTP Alt    dev servers often run here without encryption
+22     SSH          brute force and CVE target — never public
+3389   RDP          constant attack target, multiple critical CVEs
+3306   MySQL        databases must never be internet-facing
+5432   PostgreSQL   same reason as MySQL
+6379   Redis        often runs with no authentication by default
+27017  MongoDB      thousands of databases wiped by attackers this way
+21     FTP          credentials sent in plaintext
+23     Telnet       everything unencrypted, replaced by SSH in the 1990s
 ```
 
-### CloudTrail
+### CloudTrail — Audit logging
 
-CloudTrail records every API call in your account. It is your audit trail. Without it, you cannot investigate incidents.
-
-<img src="assets/cloudtrail.svg" width="100%"/>
+CloudTrail records every API call in your AWS account. Without it, you cannot investigate incidents.
 
 ```bash
 python aws/logging/cloudtrail_check.py --region eu-west-1
 ```
 
+```
+[MEDIUM]   mgmt-trail
+  Finding  : Trail is not configured for multi-region logging
+  Risk     : Activity in other regions leaves no audit trail
+  Fix      : Enable multi-region logging on the trail
+```
+
 ---
 
-## The CIS AWS Foundations Benchmark
+## CIS compliance scoring
 
-The CIS benchmark is the standard that security teams and auditors use to assess AWS environments. This project checks the most critical Level 1 controls.
+The CIS AWS Foundations Benchmark is the standard security teams and auditors use to assess AWS environments. This tool calculates your Level 1 score and shows exactly what to fix and by when.
 
-<img src="assets/cis-benchmark.svg" width="100%"/>
+```bash
+python aws/compliance_score.py --demo
+python aws/compliance_score.py --results results.json
+```
 
-The full benchmark is free at [cisecurity.org](https://www.cisecurity.org/benchmark/amazon_web_services).
+```
+════════════════════════════════════════════════════════════════
+  CIS AWS FOUNDATIONS BENCHMARK — LEVEL 1
+────────────────────────────────────────────────────────────────
+  Compliance score : 57%  (8/14 controls passing)
+════════════════════════════════════════════════════════════════
+
+  Identity and Access Management  40%
+    ✓  1.1  MFA enabled on root account
+    ✓  1.2  No access keys on root account
+    ✗  1.3  MFA enabled for all IAM console users  → fix within 30 days
+    ✗  1.5  No overly permissive IAM policies       → fix within 30 days
+
+  Storage  100%
+    ✓  3.1  S3 Block Public Access enabled
+    ✓  3.2  S3 buckets encrypted at rest
+    ✓  3.3  S3 access logging enabled
+
+  Networking  67%
+    ✗  4.1  SSH (port 22) not open to 0.0.0.0/0  → fix immediately
+    ✓  4.2  RDP (port 3389) not open to 0.0.0.0/0
+    ✓  4.3  Databases not publicly accessible
+```
 
 ---
 
@@ -172,94 +196,22 @@ The full benchmark is free at [cisecurity.org](https://www.cisecurity.org/benchm
 ```bash
 cd aws
 python run_all.py --region eu-west-1 --output results.json
-```
-
-```
-============================================================
-  AWS CLOUD SECURITY SCAN
-============================================================
-
-[1/4] Scanning S3 buckets...
-[2/4] Analysing IAM users...
-[3/4] Scanning security groups...
-[4/4] Checking CloudTrail...
-
-============================================================
-  SUMMARY
-============================================================
-  Total issues : 7
-  Critical     : 2
-  High         : 3
-  Medium       : 2
-============================================================
+python compliance_score.py --results results.json
 ```
 
 ---
 
-## What cloud security jobs look like
+## What cloud security roles look like
 
 ```
-Cloud Security Engineer       builds and maintains security controls in cloud environments
-Security Architect (Cloud)    designs secure cloud architectures from scratch
-Cloud GRC Analyst             assesses cloud compliance against CIS and ISO 27001
-DevSecOps Engineer            integrates security into cloud deployment pipelines
-Penetration Tester (Cloud)    tests cloud environments for vulnerabilities
+Cloud Security Engineer      builds and maintains security controls in cloud environments
+Security Architect           designs secure cloud architectures for new and existing systems
+Cloud GRC Analyst            assesses cloud compliance against CIS, ISO 27001, NIST
+DevSecOps Engineer           integrates security into cloud deployment pipelines
+Penetration Tester (Cloud)   tests cloud environments for misconfigurations and vulnerabilities
 ```
 
-The skills this project demonstrates are directly relevant to all of them. Understanding IAM, knowing why S3 buckets get misconfigured, reading security group rules and audit trails are exactly what interviewers ask about.
-
----
-
-## Try it now — no AWS account needed
-
-A full demo mode ships with the project. It runs realistic mock findings so you can see exactly what the scanner produces without any AWS credentials.
-
-```bash
-git clone https://github.com/Speed-boo3/cloud-security.git
-cd cloud-security
-pip install -r requirements.txt
-python aws/demo_mode.py
-```
-
-```
-================================================================
-  AWS CLOUD SECURITY SCAN — DEMO MODE
-================================================================
-
-[CRITICAL] company-backups-prod (S3)
-  Finding : Block Public Access is not fully enabled
-  Risk    : Anyone on the internet can read files from this bucket
-  Fix     : Enable all four Block Public Access settings immediately
-
-[CRITICAL] web-server-sg
-  Finding : Port 22 (SSH) is open to 0.0.0.0/0
-  Risk    : SSH exposed to every IP. Constant brute force target
-  Fix     : Restrict SSH to your VPN CIDR. Never expose publicly
-
-[HIGH] developer1 (IAM)
-  Finding : User has AdministratorAccess policy attached
-  Risk    : Full account takeover if credentials are compromised
-  Fix     : Replace with a scoped policy for this user's actual role
-
-Summary: 8 issues — 2 Critical, 3 High, 3 Medium
-```
-
----
-
-## Setup
-
-You need an AWS account. The AWS Free Tier is enough to run all these scanners. Sign up at [aws.amazon.com/free](https://aws.amazon.com/free/).
-
-```bash
-pip install awscli
-aws configure
-```
-
-```bash
-git clone https://github.com/Speed-boo3/cloud-security.git
-cd cloud-security
-pip install -r requirements.txt
-```
+The skills this project demonstrates are directly relevant to all of them. Understanding IAM, knowing why S3 misconfiguration causes breaches, being able to read security group rules and calculate compliance scores — these are the things interviewers ask about.
 
 ---
 
@@ -269,35 +221,54 @@ pip install -r requirements.txt
 cloud-security/
 ├── aws/
 │   ├── s3/
-│   │   └── s3_scanner.py         <- public buckets, encryption, versioning, logging
+│   │   └── s3_scanner.py          <- Block Public Access, encryption, versioning, logging
 │   ├── iam/
-│   │   └── iam_analyser.py       <- overprivileged users, missing MFA, old keys
+│   │   └── iam_analyser.py        <- overprivileged users, missing MFA, old keys
 │   ├── network/
-│   │   └── sg_scanner.py         <- dangerous ports open to the internet
+│   │   └── sg_scanner.py          <- dangerous ports open to the internet
 │   ├── logging/
-│   │   └── cloudtrail_check.py   <- audit logging configuration
-│   └── run_all.py                <- runs all four scanners
-├── assets/                       <- SVG diagrams used in README
+│   │   └── cloudtrail_check.py    <- audit logging configuration
+│   ├── utils/
+│   │   └── colors.py              <- coloured terminal output for all scanners
+│   ├── demo_mode.py               <- realistic mock scan, no AWS account needed
+│   ├── compliance_score.py        <- CIS Level 1 compliance calculator
+│   └── run_all.py                 <- runs all four scanners in sequence
+├── assets/                        <- SVG diagrams in README
 ├── frameworks/
-│   └── cis-aws-benchmark.md      <- CIS AWS Foundations Benchmark explained
+│   └── cis-aws-benchmark.md       <- CIS AWS Foundations Benchmark explained
 ├── templates/
-│   └── remediation-report.md     <- template for documenting findings
-└── resources/
-    └── README.md                 <- free learning resources for cloud security
+│   └── remediation-report.md      <- finding documentation template
+├── resources/
+│   └── README.md                  <- free learning resources
+├── explain/
+│   └── index.html                 <- interactive learning site
+└── CHANGELOG.md
+```
+
+---
+
+## Setup for real AWS scanning
+
+You need an AWS account. The Free Tier is enough.
+
+```bash
+pip install awscli
+aws configure
+cd aws
+python run_all.py --region eu-west-1 --output results.json
+python compliance_score.py --results results.json
 ```
 
 ---
 
 ## Free resources
 
-Everything in `resources/README.md` is free.
-
+- [AWS Free Tier](https://aws.amazon.com/free/) — free account to test with
+- [CIS AWS Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon_web_services) — free PDF
 - [AWS Security Best Practices](https://aws.amazon.com/security/security-resources/)
-- [CIS AWS Foundations Benchmark](https://www.cisecurity.org/benchmark/amazon_web_services)
-- [AWS Free Tier](https://aws.amazon.com/free/) for hands-on practice
-- [AWS Security Fundamentals (free course)](https://explore.skillbuilder.aws/learn/course/48)
+- [AWS Security Fundamentals — free course](https://explore.skillbuilder.aws/learn/course/48)
 - [Cloud Security Alliance guidance](https://cloudsecurityalliance.org/research/guidance)
 
 <div align="center">
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:ff9900,50:1a1a3a,100:0d1117&height=100&section=footer&text=Scan.%20Find.%20Fix.&fontSize=16&fontColor=ff9900&animation=twinkling"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:ff9900,50:1a1a0a,100:060a10&height=100&section=footer&text=Scan.%20Score.%20Fix.&fontSize=16&fontColor=ff9900&animation=twinkling"/>
 </div>

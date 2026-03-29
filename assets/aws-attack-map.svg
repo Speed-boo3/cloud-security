@@ -1,0 +1,75 @@
+<svg viewBox="0 0 800 180" xmlns="http://www.w3.org/2000/svg" width="800" height="180">
+  <rect width="800" height="180" fill="#060a10" rx="12"/>
+  <text x="400" y="20" text-anchor="middle" fill="#ff9900" font-family="JetBrains Mono,monospace" font-size="10" letter-spacing="2" font-weight="700">CLOUD ATTACK SURFACE — COMMON BREACH VECTORS</text>
+
+  <!-- Internet -->
+  <rect x="20" y="40" width="100" height="100" rx="8" fill="#0a0505" stroke="#e53935" stroke-width="1.5"/>
+  <text x="70" y="80" text-anchor="middle" fill="#e53935" font-family="JetBrains Mono,monospace" font-size="18">🌐</text>
+  <text x="70" y="98" text-anchor="middle" fill="#e53935" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700">ATTACKER</text>
+  <text x="70" y="112" text-anchor="middle" fill="#475569" font-family="JetBrains Mono,monospace" font-size="8">internet</text>
+
+  <!-- Arrows with labels -->
+  <!-- Arrow 1: S3 -->
+  <line x1="122" y1="72" x2="198" y2="52" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" values="0;-16" dur="0.8s" repeatCount="indefinite"/>
+  </line>
+  <polygon points="198,48 208,52 198,56" fill="#e53935"/>
+  <text x="155" y="56" fill="#e53935" font-family="JetBrains Mono,monospace" font-size="8">public S3</text>
+
+  <!-- Arrow 2: SSH -->
+  <line x1="122" y1="90" x2="198" y2="90" stroke="#ff6d00" stroke-width="1.5" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" values="0;-16" dur="0.8s" repeatCount="indefinite" begin="0.2s"/>
+  </line>
+  <polygon points="198,86 208,90 198,94" fill="#ff6d00"/>
+  <text x="138" y="86" fill="#ff6d00" font-family="JetBrains Mono,monospace" font-size="8">SSH:22 open</text>
+
+  <!-- Arrow 3: IAM -->
+  <line x1="122" y1="108" x2="198" y2="128" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,3">
+    <animate attributeName="stroke-dashoffset" values="0;-16" dur="0.8s" repeatCount="indefinite" begin="0.4s"/>
+  </line>
+  <polygon points="198,124 208,128 198,132" fill="#fbbf24"/>
+  <text x="138" y="126" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="8">leaked keys</text>
+
+  <!-- AWS Cloud box -->
+  <rect x="210" y="30" width="380" height="130" rx="10" fill="#0a1628" stroke="#1e2d45" stroke-width="1.5"/>
+  <text x="400" y="48" text-anchor="middle" fill="#475569" font-family="JetBrains Mono,monospace" font-size="9" letter-spacing="1">AWS ACCOUNT</text>
+
+  <!-- S3 -->
+  <rect x="228" y="56" width="90" height="44" rx="6" fill="#1a0505" stroke="#e53935" stroke-width="1"/>
+  <text x="273" y="76" text-anchor="middle" fill="#ff9900" font-family="JetBrains Mono,monospace" font-size="16">🪣</text>
+  <text x="273" y="92" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="8">S3 Bucket</text>
+
+  <!-- EC2/SG -->
+  <rect x="335" y="56" width="90" height="44" rx="6" fill="#1a0a00" stroke="#ff6d00" stroke-width="1"/>
+  <text x="380" y="76" text-anchor="middle" fill="#ff9900" font-family="JetBrains Mono,monospace" font-size="16">🖥</text>
+  <text x="380" y="92" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="8">EC2 / SG</text>
+
+  <!-- IAM -->
+  <rect x="442" y="56" width="90" height="44" rx="6" fill="#1a1800" stroke="#fbbf24" stroke-width="1"/>
+  <text x="487" y="76" text-anchor="middle" fill="#ff9900" font-family="JetBrains Mono,monospace" font-size="16">🔑</text>
+  <text x="487" y="92" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="8">IAM</text>
+
+  <!-- Data layer -->
+  <rect x="228" y="112" width="304" height="36" rx="6" fill="#050a0f" stroke="#1e2d45" stroke-width="1"/>
+  <text x="380" y="128" text-anchor="middle" fill="#475569" font-family="JetBrains Mono,monospace" font-size="8">Sensitive data — customer records, credentials, infrastructure</text>
+  <text x="380" y="141" text-anchor="middle" fill="#e53935" font-family="JetBrains Mono,monospace" font-size="8" opacity="0">
+    ← exposed if any control above fails →
+    <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+  </text>
+
+  <!-- CloudTrail -->
+  <rect x="610" y="56" width="100" height="44" rx="6" fill="#050a1a" stroke="#2979ff" stroke-width="1"/>
+  <text x="660" y="76" text-anchor="middle" fill="#ff9900" font-family="JetBrains Mono,monospace" font-size="16">📋</text>
+  <text x="660" y="92" text-anchor="middle" fill="#94a3b8" font-family="JetBrains Mono,monospace" font-size="8">CloudTrail</text>
+
+  <!-- CloudTrail arrow -->
+  <line x1="534" y1="78" x2="608" y2="78" stroke="#2979ff" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="568" y="74" fill="#2979ff" font-family="JetBrains Mono,monospace" font-size="7">logs all</text>
+
+  <!-- Breach result -->
+  <rect x="610" y="112" width="100" height="36" rx="6" fill="#1a0505" stroke="#e53935" stroke-width="1">
+    <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <text x="660" y="128" text-anchor="middle" fill="#e53935" font-family="JetBrains Mono,monospace" font-size="8" font-weight="700">DATA BREACH</text>
+  <text x="660" y="141" text-anchor="middle" fill="#475569" font-family="JetBrains Mono,monospace" font-size="7">if undetected</text>
+</svg>

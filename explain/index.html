@@ -3,893 +3,494 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Cloud Security — Learn by doing</title>
+<title>Cloud Security — AWS Misconfiguration Scanning</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
-
-  :root {
-    --aws: #ff9900;
-    --green: #00ff41;
-    --red: #ff4444;
-    --blue: #4488ff;
-    --bg: #0d1117;
-    --card: #161b22;
-    --border: #30363d;
-    --text: #e6edf3;
-    --muted: #8b949e;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* HERO */
-  .hero {
-    background: linear-gradient(135deg, #0d1117 0%, #0a1a2e 50%, #1a0d00 100%);
-    padding: 60px 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 50% 0%, rgba(255,153,0,0.1) 0%, transparent 70%);
-  }
-
-  .hero h1 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 700;
-    color: var(--aws);
-    margin-bottom: 12px;
-    position: relative;
-  }
-
-  .hero p {
-    color: var(--muted);
-    font-size: 1.1rem;
-    max-width: 600px;
-    margin: 0 auto 32px;
-    position: relative;
-  }
-
-  .hero-badges {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    position: relative;
-  }
-
-  .badge {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 0.82rem;
-    color: var(--muted);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* NAV TABS */
-  .tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border);
-    background: var(--card);
-    overflow-x: auto;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .tab {
-    padding: 14px 24px;
-    cursor: pointer;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-    transition: all 0.2s;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    font-family: inherit;
-  }
-
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--aws); border-bottom-color: var(--aws); }
-
-  /* SECTIONS */
-  .section { display: none; padding: 40px 20px; max-width: 900px; margin: 0 auto; }
-  .section.active { display: block; }
-
-  .section-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--aws);
-  }
-
-  .section-intro {
-    color: var(--muted);
-    font-size: 0.95rem;
-    line-height: 1.7;
-    margin-bottom: 32px;
-    max-width: 700px;
-  }
-
-  /* CONCEPT CARDS */
-  .concept-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .concept-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    transition: border-color 0.2s, transform 0.2s;
-    cursor: default;
-  }
-
-  .concept-card:hover {
-    border-color: var(--aws);
-    transform: translateY(-3px);
-  }
-
-  .concept-icon {
-    font-size: 2rem;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  .concept-title {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-
-  .concept-body {
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  /* SPLIT VISUAL */
-  .split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  @media (max-width: 600px) { .split { grid-template-columns: 1fr; } }
-
-  .split-box {
-    border-radius: 12px;
-    padding: 24px;
-    border: 1px solid var(--border);
-  }
-
-  .split-box.aws-side {
-    background: linear-gradient(135deg, #0a1a3a, #1a2a4a);
-    border-color: var(--aws);
-  }
-
-  .split-box.you-side {
-    background: linear-gradient(135deg, #2a0a0a, #3a1a1a);
-    border-color: var(--red);
-  }
-
-  .split-box h3 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .split-box .label {
-    font-size: 0.75rem;
-    margin-bottom: 16px;
-    opacity: 0.7;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .split-box ul { list-style: none; }
-  .split-box ul li {
-    padding: 7px 0;
-    font-size: 0.88rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .split-box ul li:last-child { border-bottom: none; }
-
-  /* INTERACTIVE SCANNER */
-  .scanner-demo {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 32px;
-  }
-
-  .scanner-header {
-    background: #0d1117;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot.red { background: #ff5f56; }
-  .dot.yellow { background: #ffbd2e; }
-  .dot.green { background: #27c93f; }
-
-  .scanner-title {
-    margin-left: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    color: var(--muted);
-  }
-
-  .scanner-body { padding: 24px; }
-
-  .scan-btn {
-    background: var(--aws);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 28px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    margin-bottom: 20px;
-  }
-
-  .scan-btn:hover { background: #e68800; transform: translateY(-2px); }
-  .scan-btn:active { transform: translateY(0); }
-
-  .scan-output {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    line-height: 1.8;
-    min-height: 80px;
-  }
-
-  .finding { margin: 12px 0; padding: 14px; border-radius: 8px; opacity: 0; transform: translateY(10px); transition: all 0.4s; }
-  .finding.show { opacity: 1; transform: translateY(0); }
-  .finding.critical { background: rgba(255,0,0,0.08); border-left: 3px solid #ff0000; }
-  .finding.high { background: rgba(255,100,0,0.08); border-left: 3px solid #ff6600; }
-  .finding.medium { background: rgba(255,200,0,0.08); border-left: 3px solid #ffcc00; }
-  .finding.ok { background: rgba(0,255,65,0.08); border-left: 3px solid var(--green); }
-
-  .finding-level { font-weight: 700; margin-bottom: 4px; }
-  .finding-level.critical { color: #ff4444; }
-  .finding-level.high { color: #ff8800; }
-  .finding-level.medium { color: #ffcc00; }
-  .finding-level.ok { color: var(--green); }
-  .finding-detail { color: var(--muted); font-size: 0.78rem; }
-  .finding-fix { color: var(--blue); font-size: 0.78rem; margin-top: 4px; }
-
-  /* CHECKLIST */
-  .checklist { list-style: none; margin-bottom: 32px; }
-  .check-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    background: var(--card);
-  }
-
-  .check-item:hover { border-color: var(--aws); }
-  .check-item.checked { border-color: var(--green); background: rgba(0,255,65,0.04); }
-
-  .check-box {
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--border);
-    border-radius: 5px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-    margin-top: 1px;
-  }
-
-  .check-item.checked .check-box {
-    background: var(--green);
-    border-color: var(--green);
-    color: #000;
-  }
-
-  .check-text { flex: 1; }
-  .check-title { font-size: 0.92rem; font-weight: 600; margin-bottom: 3px; }
-  .check-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
-
-  .progress-bar-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    height: 8px;
-    margin-bottom: 8px;
-    overflow: hidden;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--green);
-    border-radius: 8px;
-    transition: width 0.4s ease;
-    width: 0%;
-  }
-
-  .progress-label {
-    font-size: 0.8rem;
-    color: var(--muted);
-    margin-bottom: 20px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* RISK MATRIX INTERACTIVE */
-  .risk-matrix-wrap { margin-bottom: 32px; }
-
-  .risk-inputs {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .risk-input-group { flex: 1; min-width: 200px; }
-  .risk-input-group label {
-    display: block;
-    font-size: 0.82rem;
-    color: var(--muted);
-    margin-bottom: 8px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .risk-slider {
-    width: 100%;
-    accent-color: var(--aws);
-  }
-
-  .risk-result {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    text-align: center;
-    transition: border-color 0.3s;
-  }
-
-  .risk-score-big {
-    font-size: 4rem;
-    font-weight: 700;
-    font-family: 'JetBrains Mono', monospace;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-
-  .risk-level-label {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .risk-action { font-size: 0.85rem; color: var(--muted); }
-
-  /* IAM Visual */
-  .iam-demo {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
-    margin-bottom: 32px;
-  }
-
-  .iam-user {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    transition: border-color 0.2s;
-  }
-
-  .iam-user.bad { border-color: var(--red); background: rgba(255,68,68,0.05); }
-  .iam-user.good { border-color: var(--green); background: rgba(0,255,65,0.05); }
-
-  .iam-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
-
-  .iam-policy {
-    font-size: 0.78rem;
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: inline-block;
-    margin: 3px 2px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .iam-policy.danger { background: rgba(255,68,68,0.15); color: #ff8888; border: 1px solid rgba(255,68,68,0.3); }
-  .iam-policy.safe { background: rgba(0,255,65,0.1); color: #88ff88; border: 1px solid rgba(0,255,65,0.2); }
-
-  .iam-issue { font-size: 0.78rem; margin-top: 10px; padding: 8px; border-radius: 6px; }
-  .iam-issue.warn { background: rgba(255,68,68,0.1); color: #ff8888; }
-  .iam-issue.ok { background: rgba(0,255,65,0.1); color: #88ff88; }
-
-  /* FOOTER */
-  footer {
-    text-align: center;
-    padding: 40px 20px;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 0.82rem;
-  }
-
-  footer a { color: var(--aws); text-decoration: none; }
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;800;900&display=swap');
+:root{
+  --aws:#ff9900;--red:#e53935;--green:#00e676;--blue:#2979ff;--purple:#7c4dff;--orange:#ff6d00;
+  --bg:#060a10;--s1:#0a1020;--card:#111827;--card2:#161f2e;
+  --b1:#1e2d45;--b2:#243447;--t1:#f0f4f8;--t2:#94a3b8;--t3:#475569;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.04}
+.wrap{position:relative;z-index:1}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:58px;display:flex;align-items:center;padding:0 32px;gap:14px;backdrop-filter:blur(20px);background:rgba(6,10,16,0.85);border-bottom:1px solid var(--b1)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#ff9900,#ff6d00);border-radius:7px;display:grid;place-items:center;font-size:1rem}
+.logo-text{font-weight:800;font-size:.85rem}
+.nav-sp{flex:1}
+.navlinks{display:flex;gap:2px}
+.nl{background:none;border:none;padding:6px 13px;border-radius:6px;font-size:.76rem;font-weight:600;color:var(--t3);cursor:pointer;font-family:inherit;transition:all .2s}
+.nl:hover{color:var(--t1);background:rgba(255,255,255,.05)}
+.nl.active{color:var(--aws);background:rgba(255,153,0,.08)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 32px 60px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(255,153,0,0.07) 0%,transparent 60%)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--b2);border-radius:100px;padding:5px 16px 5px 10px;font-size:.7rem;color:var(--t2);font-family:var(--mono);margin-bottom:28px;letter-spacing:.5px}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:ldot 2s ease-in-out infinite}
+@keyframes ldot{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.5)}60%{box-shadow:0 0 0 6px rgba(0,230,118,0)}}
+.hero h1{font-size:clamp(2.5rem,6vw,4.8rem);font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:20px}
+.hero h1 span{color:var(--aws)}
+.hero-desc{font-size:.98rem;color:var(--t2);max-width:560px;margin:0 auto 36px;line-height:1.8}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:52px}
+.btn-p{padding:12px 26px;background:var(--aws);color:#000;border:none;border-radius:8px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:inherit;transition:all .25s}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,153,0,.3)}
+.btn-s{padding:12px 26px;background:transparent;color:var(--t1);border:1px solid var(--b2);border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .25s}
+.btn-s:hover{border-color:var(--t3);transform:translateY(-2px)}
+.hero-stats{display:flex;gap:40px;justify-content:center;flex-wrap:wrap}
+.hstat{text-align:center}
+.hstat-n{font-size:2rem;font-weight:900;font-family:var(--mono);letter-spacing:-1px;display:block}
+.hstat-l{font-size:.65rem;color:var(--t3);text-transform:uppercase;letter-spacing:1.5px;margin-top:2px}
+
+/* TICKER */
+.ticker{background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:10px 0;overflow:hidden;position:relative}
+.tmask{position:absolute;top:0;bottom:0;width:80px;z-index:2;pointer-events:none}
+.tmask.l{left:0;background:linear-gradient(90deg,var(--s1),transparent)}
+.tmask.r{right:0;background:linear-gradient(270deg,var(--s1),transparent)}
+.ttrack{display:flex;animation:tscroll 50s linear infinite}
+.ti{white-space:nowrap;padding:0 40px;font-size:.74rem;font-family:var(--mono);color:var(--t3);display:flex;align-items:center;gap:7px}
+.tsev{font-weight:700;font-size:.68rem}
+.tsev.cr{color:var(--red)}.tsev.hi{color:var(--orange)}.tsev.me{color:#fbbf24}.tsev.ok{color:var(--green)}
+@keyframes tscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* TABS */
+.tabwrap{background:var(--s1);border-bottom:1px solid var(--b1);position:sticky;top:58px;z-index:100;display:flex;overflow-x:auto;padding:0 32px}
+.tab{padding:15px 18px;font-size:.78rem;font-weight:600;color:var(--t3);border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:var(--t2)}.tab.active{color:var(--aws);border-bottom-color:var(--aws)}
+
+/* SECTIONS */
+.sec{display:none;padding:52px 32px;max-width:1060px;margin:0 auto;animation:si .3s ease}
+.sec.active{display:block}
+@keyframes si{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){.sec{padding:32px 18px}}
+.slabel{font-size:.63rem;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.slabel::before{content:'';width:16px;height:1px;background:var(--b2)}
+.stitle{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900;letter-spacing:-1px;margin-bottom:10px}
+.sdesc{color:var(--t2);font-size:.9rem;line-height:1.8;max-width:680px;margin-bottom:36px}
+
+/* IMAGE CARDS */
+.imgrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px;margin-bottom:36px}
+.ic{border-radius:12px;overflow:hidden;position:relative;border:1px solid var(--b1);transition:all .3s;cursor:default}
+.ic:hover{border-color:var(--b2);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.ic img{width:100%;height:200px;object-fit:cover;display:block;filter:brightness(.45) saturate(.6);transition:all .4s}
+.ic:hover img{filter:brightness(.65) saturate(.85)}
+.icov{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(transparent,rgba(6,10,16,.95))}
+.ick{font-size:.6rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;font-weight:700}
+.ict{font-size:.9rem;font-weight:700;color:#fff;margin-bottom:2px}
+.icb{font-size:.74rem;color:rgba(255,255,255,.5);line-height:1.5}
+
+/* GRID CARDS */
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1px;background:var(--b1);border:1px solid var(--b1);border-radius:12px;overflow:hidden;margin-bottom:36px}
+.gc{background:var(--card);padding:24px;transition:background .2s;position:relative}
+.gc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--b2),transparent);opacity:0;transition:opacity .3s}
+.gc:hover{background:var(--card2)}.gc:hover::before{opacity:1}
+.gcicon{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font-size:1.1rem;margin-bottom:14px}
+.gcicon.aws{background:rgba(255,153,0,.1);border:1px solid rgba(255,153,0,.2)}
+.gcicon.r{background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.2)}
+.gcicon.g{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2)}
+.gcicon.b{background:rgba(41,121,255,.1);border:1px solid rgba(41,121,255,.2)}
+.gctitle{font-size:.88rem;font-weight:700;margin-bottom:5px}
+.gcbody{font-size:.79rem;color:var(--t2);line-height:1.6}
+.gctag{display:inline-block;font-size:.63rem;font-family:var(--mono);padding:2px 7px;border-radius:4px;margin-top:10px;border:1px solid;font-weight:700}
+.gctag.aws{background:rgba(255,153,0,.08);color:var(--aws);border-color:rgba(255,153,0,.2)}
+.gctag.r{background:rgba(229,57,53,.08);color:var(--red);border-color:rgba(229,57,53,.2)}
+
+/* TERMINAL */
+.term{background:#020509;border:1px solid var(--b1);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.termbar{background:var(--s1);padding:11px 16px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--b1)}
+.tdot{width:10px;height:10px;border-radius:50%}
+.tdot.r{background:#ff5f56}.tdot.y{background:#ffbd2e}.tdot.g{background:#27c93f}
+.termtitle{margin-left:8px;font-family:var(--mono);font-size:.73rem;color:var(--t3)}
+.termbody{padding:20px;font-family:var(--mono);font-size:.78rem;line-height:2;min-height:160px}
+.tp{color:var(--aws)}.tc{color:#fff}.tout{color:var(--t3)}.tg{color:var(--green)}.tb{color:var(--blue)}.to{color:var(--orange)}.tr{color:var(--red)}.ty{color:#fbbf24}
+.tcur{display:inline-block;width:2px;height:.85em;background:#fff;animation:bc 1s step-end infinite;vertical-align:text-bottom}
+@keyframes bc{0%,100%{opacity:1}50%{opacity:0}}
+.fline{margin:6px 0;padding:10px 13px;border-radius:6px;border-left:2.5px solid;opacity:0;transform:translateX(-5px);transition:all .3s}
+.fline.show{opacity:1;transform:translateX(0)}
+.fline.cr{background:rgba(229,57,53,.06);border-color:var(--red)}
+.fline.hi{background:rgba(255,109,0,.06);border-color:var(--orange)}
+.fline.me{background:rgba(251,191,36,.06);border-color:#fbbf24}
+.fline.ok{background:rgba(0,230,118,.05);border-color:var(--green)}
+
+/* SCAN BTN */
+.scanbtn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:var(--s1);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:20px}
+.scanbtn:hover{border-color:var(--aws);color:var(--aws)}.scanbtn:disabled{opacity:.35;cursor:not-allowed}
+.sdot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:sp 1.2s ease-in-out infinite}
+@keyframes sp{0%,100%{transform:scale(1)}50%{transform:scale(.4);opacity:.5}}
+
+/* COMPLIANCE GAUGE */
+.gauge-wrap{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:28px;margin-bottom:32px}
+.gauge-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.gauge-score{font-size:3.5rem;font-weight:900;font-family:var(--mono);letter-spacing:-2px}
+.gauge-label{font-size:.72rem;color:var(--t3);font-family:var(--mono);margin-top:4px}
+.ctrl-list{display:flex;flex-direction:column;gap:8px}
+.ctrl-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;border:1px solid var(--b1);font-size:.8rem;cursor:default;transition:border-color .2s}
+.ctrl-item:hover{border-color:var(--b2)}
+.ctrl-pass{border-color:rgba(0,230,118,.2);background:rgba(0,230,118,.03)}
+.ctrl-fail{border-color:rgba(229,57,53,.2);background:rgba(229,57,53,.03)}
+.ctrl-icon{font-size:.9rem;flex-shrink:0}
+.ctrl-id{font-family:var(--mono);font-size:.65rem;color:var(--t3);flex-shrink:0;width:28px}
+.ctrl-title{flex:1;font-weight:600}
+.ctrl-status{font-size:.68rem;font-family:var(--mono);font-weight:700;flex-shrink:0}
+.ctrl-deadline{font-size:.65rem;color:var(--t3);font-family:var(--mono);flex-shrink:0}
+
+/* RISK GRID */
+.risk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:32px}
+.risk-card{background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:18px;transition:all .2s;position:relative;overflow:hidden}
+.risk-card:hover{border-color:var(--b2);transform:translateY(-3px)}
+.risk-service{font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700}
+.risk-title{font-size:.88rem;font-weight:700;margin-bottom:6px}
+.risk-body{font-size:.78rem;color:var(--t2);line-height:1.6}
+.risk-badge{display:inline-block;font-size:.65rem;font-family:var(--mono);padding:2px 8px;border-radius:4px;margin-top:10px;border:1px solid;font-weight:700}
+
+/* IP LOOKUP */
+.iplookup{background:var(--card);border:1px solid var(--b1);border-radius:12px;overflow:hidden;margin-bottom:28px}
+.ipbar{background:var(--s1);padding:11px 16px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.72rem;color:var(--t3)}
+.ipbody{padding:22px}
+.iprow{display:flex;gap:8px;margin-bottom:14px}
+.ipinput{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:9px 13px;font-family:var(--mono);font-size:.78rem;color:var(--t1);outline:none;transition:border-color .2s}
+.ipinput:focus{border-color:var(--aws)}
+.ipbtn{padding:9px 18px;background:var(--s1);border:1px solid var(--b2);border-radius:6px;color:var(--t1);font-family:var(--mono);font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ipbtn:hover{border-color:var(--aws);color:var(--aws)}
+.ipres{background:var(--s1);border:1px solid var(--b1);border-radius:7px;padding:14px;font-family:var(--mono);font-size:.76rem;line-height:2;min-height:40px;color:var(--t2);display:none}
+
+/* CHECKLIST */
+.clist{list-style:none;margin-bottom:32px}
+.ci{display:flex;gap:12px;padding:14px;border:1px solid var(--b1);border-radius:8px;margin-bottom:7px;cursor:pointer;background:var(--card);transition:all .2s}
+.ci:hover{border-color:var(--b2)}.ci.done{border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.03)}
+.cbox{width:18px;height:18px;border:1.5px solid var(--b2);border-radius:5px;flex-shrink:0;display:grid;place-items:center;font-size:.75rem;transition:all .2s;margin-top:2px}
+.ci.done .cbox{background:var(--green);border-color:var(--green);color:#000;font-weight:900}
+.ct{font-size:.85rem;font-weight:600;margin-bottom:2px}
+.cd{font-size:.75rem;color:var(--t3);line-height:1.55}
+.pbwrap{background:var(--card);border:1px solid var(--b1);border-radius:3px;height:3px;margin-bottom:5px;overflow:hidden}
+.pbfill{height:100%;background:linear-gradient(90deg,var(--aws),var(--orange));border-radius:3px;transition:width .4s ease;width:0%}
+.pblbl{font-size:.7rem;color:var(--t3);margin-bottom:20px;font-family:var(--mono)}
+
+.callout{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:18px 20px;margin-bottom:32px;display:flex;gap:13px;align-items:flex-start}
+.calltitle{font-weight:700;font-size:.85rem;margin-bottom:4px}
+.callbody{font-size:.78rem;color:var(--t2);line-height:1.7}
+
+footer{border-top:1px solid var(--b1);padding:32px;text-align:center;font-size:.75rem;color:var(--t3)}
+footer a{color:var(--t2);text-decoration:none}footer a:hover{color:var(--t1)}
 </style>
 </head>
 <body>
+<canvas id="bg"></canvas>
+<div class="wrap">
 
+<nav>
+  <a class="logo" href="#"><div class="logo-icon">☁️</div><span class="logo-text">Cloud Security</span></a>
+  <div class="nav-sp"></div>
+  <div class="navlinks">
+    <button class="nl active" onclick="go('overview',this)">Overview</button>
+    <button class="nl" onclick="go('scanner',this)">Scanners</button>
+    <button class="nl" onclick="go('compliance',this)">CIS Score</button>
+    <button class="nl" onclick="go('intel',this)">Threat Intel</button>
+    <button class="nl" onclick="go('checklist',this)">Self-assess</button>
+  </div>
+</nav>
+
+<!-- HERO -->
 <div class="hero">
-  <h1>☁️ Cloud Security</h1>
-  <p>Learn what cloud security actually is and why it matters. Built for students who want to work in cybersecurity.</p>
-  <div class="hero-badges">
-    <span class="badge">AWS</span>
-    <span class="badge">IAM</span>
-    <span class="badge">S3</span>
-    <span class="badge">CloudTrail</span>
-    <span class="badge">CIS Benchmark</span>
+  <div class="hero-badge"><div class="live-dot"></div>Cloud Security Portfolio Project</div>
+  <h1>AWS <span>Security</span><br/>Scanning</h1>
+  <p class="hero-desc">Find the misconfigurations that cause real-world data breaches. S3 buckets, IAM policies, security groups, CloudTrail logging — all checked automatically against the CIS benchmark.</p>
+  <div class="hero-btns">
+    <button class="btn-p" onclick="go('scanner',null)">Try the scanner</button>
+    <button class="btn-s" onclick="go('compliance',null)">View compliance score</button>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><span class="hstat-n" data-t="4" style="color:var(--aws)">0</span><div class="hstat-l">Scanners built</div></div>
+    <div class="hstat"><span class="hstat-n" data-t="14" style="color:var(--aws)">0</span><div class="hstat-l">CIS Level 1 checks</div></div>
+    <div class="hstat"><span class="hstat-n" data-t="10" style="color:var(--green)">0</span><div class="hstat-l">Dangerous ports flagged</div></div>
+    <div class="hstat"><span class="hstat-n" data-t="0" style="color:var(--green)">0</span><div class="hstat-l">AWS account needed</div></div>
   </div>
 </div>
 
-<div class="tabs">
-  <button class="tab active" onclick="show('intro')">What is cloud security?</button>
-  <button class="tab" onclick="show('responsibility')">Who is responsible?</button>
-  <button class="tab" onclick="show('scanner')">Try the scanner</button>
-  <button class="tab" onclick="show('iam')">IAM explained</button>
-  <button class="tab" onclick="show('risk')">Risk scoring</button>
-  <button class="tab" onclick="show('checklist')">Security checklist</button>
+<!-- TICKER -->
+<div class="ticker">
+  <div class="tmask l"></div><div class="tmask r"></div>
+  <div class="ttrack" id="ttrack"></div>
 </div>
 
-<!-- INTRO -->
-<div class="section active" id="intro">
-  <div class="section-title">What is cloud security?</div>
-  <div class="section-intro">
-    Most people think getting hacked means someone writes clever exploit code. In reality, most cloud breaches happen because someone left a door open. A public S3 bucket. An admin account with no password protection. A database exposed to the entire internet. Cloud security is the work of finding and closing those doors.
-  </div>
-
-  <div class="concept-grid">
-    <div class="concept-card">
-      <span class="concept-icon">🪣</span>
-      <div class="concept-title">S3 Buckets</div>
-      <div class="concept-body">S3 is AWS cloud storage. Companies store everything there — backups, user uploads, application files. If a bucket is accidentally set to public, anyone on the internet can download those files. This has caused some of the biggest data breaches in history.</div>
-    </div>
-    <div class="concept-card">
-      <span class="concept-icon">🔑</span>
-      <div class="concept-title">IAM (Identity and Access Management)</div>
-      <div class="concept-body">IAM controls who can do what in your AWS account. The most common mistake is giving users far more permissions than they need. If one of those users gets hacked, the attacker inherits all their permissions.</div>
-    </div>
-    <div class="concept-card">
-      <span class="concept-icon">🔒</span>
-      <div class="concept-title">Security Groups</div>
-      <div class="concept-body">Security groups are cloud firewalls. They define which network traffic is allowed. Leaving a port like SSH or RDP open to the entire internet is like leaving your front door unlocked — attackers scan for this constantly.</div>
-    </div>
-    <div class="concept-card">
-      <span class="concept-icon">📋</span>
-      <div class="concept-title">CloudTrail</div>
-      <div class="concept-body">CloudTrail records every action taken in your AWS account. Who deleted that file? Who changed the firewall rule? Without CloudTrail enabled, you have no way to answer those questions after an incident.</div>
-    </div>
-    <div class="concept-card">
-      <span class="concept-icon">📏</span>
-      <div class="concept-title">CIS Benchmark</div>
-      <div class="concept-body">The Center for Internet Security publishes a free checklist of security controls specifically for AWS. It is what security teams and auditors use to assess cloud environments. Passing it means you have covered the basics.</div>
-    </div>
-    <div class="concept-card">
-      <span class="concept-icon">⚖️</span>
-      <div class="concept-title">Least Privilege</div>
-      <div class="concept-body">The principle of least privilege means every user, service and application should have only the minimum access needed to do its job — nothing more. It limits the damage if something goes wrong.</div>
-    </div>
-  </div>
+<!-- TABS -->
+<div class="tabwrap">
+  <button class="tab active" onclick="go('overview',this)">Overview</button>
+  <button class="tab" onclick="go('scanner',this)">Live scanner</button>
+  <button class="tab" onclick="go('compliance',this)">CIS compliance</button>
+  <button class="tab" onclick="go('intel',this)">Threat intel</button>
+  <button class="tab" onclick="go('checklist',this)">Self-assess</button>
 </div>
 
-<!-- RESPONSIBILITY -->
-<div class="section" id="responsibility">
-  <div class="section-title">Who is responsible?</div>
-  <div class="section-intro">
-    The most important concept in cloud security. AWS secures the physical infrastructure. You are responsible for everything you build and configure on top of it. This is called the Shared Responsibility Model.
+<!-- OVERVIEW -->
+<div class="sec active" id="overview">
+  <div class="slabel">Why this matters</div>
+  <div class="stitle">Most cloud breaches are preventable</div>
+  <p class="sdesc">The biggest cloud data breaches in recent years were not caused by sophisticated exploits. They were caused by a public S3 bucket, an admin IAM user with no MFA, or a database exposed to the internet. This project finds all of those automatically.</p>
+
+  <div class="imgrow">
+    <div class="ic"><img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80" alt="Cloud"/><div class="icov"><div class="ick" style="color:var(--aws)">Storage</div><div class="ict">S3 misconfiguration</div><div class="icb">A single public bucket can expose millions of customer records.</div></div></div>
+    <div class="ic"><img src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=600&q=80" alt="IAM"/><div class="icov"><div class="ick" style="color:var(--red)">Identity</div><div class="ict">IAM overprivilege</div><div class="icb">AdministratorAccess on a CI pipeline is a full account takeover waiting to happen.</div></div></div>
+    <div class="ic"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=80" alt="Network"/><div class="icov"><div class="ick" style="color:var(--orange)">Network</div><div class="ict">Open security groups</div><div class="icb">SSH on 0.0.0.0/0 is scanned by attackers within minutes of deployment.</div></div></div>
   </div>
 
-  <div class="split">
-    <div class="split-box aws-side">
-      <h3 style="color:#ff9900">AWS is responsible for</h3>
-      <div class="label">"Security OF the cloud"</div>
-      <ul>
-        <li><span>🏢</span> Physical data centres</li>
-        <li><span>🌐</span> Network infrastructure</li>
-        <li><span>💻</span> Server hardware</li>
-        <li><span>🔧</span> Hypervisor and virtualisation</li>
-        <li><span>⚡</span> Power and cooling</li>
-        <li><span>🛡️</span> Managed service security</li>
-      </ul>
-      <div style="margin-top:14px;font-size:0.78rem;color:#888">AWS has never been hacked at the infrastructure level.</div>
-    </div>
-    <div class="split-box you-side">
-      <h3 style="color:#ff4444">You are responsible for</h3>
-      <div class="label">"Security IN the cloud"</div>
-      <ul>
-        <li><span>🪣</span> What you store in S3</li>
-        <li><span>🔑</span> Who has IAM access</li>
-        <li><span>🔒</span> Your security group rules</li>
-        <li><span>📋</span> Whether logging is on</li>
-        <li><span>💻</span> Your application code</li>
-        <li><span>🔐</span> Your data encryption choices</li>
-      </ul>
-      <div style="margin-top:14px;font-size:0.78rem;color:#ff8888">Most cloud breaches happen here.</div>
-    </div>
-  </div>
-
-  <div style="background:rgba(255,153,0,0.08);border:1px solid rgba(255,153,0,0.3);border-radius:10px;padding:20px;font-size:0.88rem;line-height:1.7;color:#ccc">
-    <strong style="color:#ff9900">Real example:</strong> In 2019, Capital One suffered a breach affecting over 100 million customers. It was not because AWS was hacked. It was because of a misconfigured web application firewall that the attacker exploited to access S3 buckets that should have been private. AWS did their job. The customer did not configure their side correctly.
+  <div class="cg">
+    <div class="gc"><div class="gcicon aws">🪣</div><div class="gctitle">S3 Scanner</div><div class="gcbody">Checks every bucket for Block Public Access, encryption, versioning and access logging. Sorts findings by severity.</div><span class="gctag aws">s3_scanner.py</span></div>
+    <div class="gc"><div class="gcicon r">🔑</div><div class="gctitle">IAM Analyser</div><div class="gcbody">Finds overprivileged users, missing MFA and access keys older than 90 days. Maps to least privilege best practice.</div><span class="gctag r">iam_analyser.py</span></div>
+    <div class="gc"><div class="gcicon r">🔒</div><div class="gctitle">Security Group Scanner</div><div class="gcbody">Flags dangerous ports open to 0.0.0.0/0 — SSH, RDP, MySQL, Redis, MongoDB and more. Explains why each port is dangerous.</div><span class="gctag r">sg_scanner.py</span></div>
+    <div class="gc"><div class="gcicon b">📋</div><div class="gctitle">CloudTrail Check</div><div class="gcbody">Verifies audit logging is active, multi-region and has log file validation. Without it, incidents cannot be investigated.</div><span class="gctag aws">cloudtrail_check.py</span></div>
+    <div class="gc"><div class="gcicon g">📊</div><div class="gctitle">CIS Compliance Score</div><div class="gcbody">Calculates your Level 1 score across 14 controls. Groups by category, shows what is failing and when to fix it.</div><span class="gctag aws">compliance_score.py</span></div>
+    <div class="gc"><div class="gcicon g">🎮</div><div class="gctitle">Demo Mode</div><div class="gcbody">Runs realistic mock findings with no AWS credentials. Anyone can see the full scanner output immediately after cloning.</div><span class="gctag aws">demo_mode.py</span></div>
   </div>
 </div>
 
 <!-- SCANNER -->
-<div class="section" id="scanner">
-  <div class="section-title">Try the scanner</div>
-  <div class="section-intro">
-    This is a simulation of what the real scanner finds. Click Scan to see what a typical AWS account looks like — and what the problems mean.
+<div class="sec" id="scanner">
+  <div class="slabel">Live simulation</div>
+  <div class="stitle">The scanner in action</div>
+  <p class="sdesc">This simulates the real scanner output. Click Execute to run a full demo scan — S3, IAM, security groups and CloudTrail — exactly as it looks in your terminal.</p>
+
+  <div class="imgrow">
+    <div class="ic"><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&q=80" alt="Scan"/><div class="icov"><div class="ick" style="color:var(--aws)">How it works</div><div class="ict">Connect once, scan everything</div><div class="icb">boto3 connects to AWS, runs all four checks, outputs coloured findings sorted by severity.</div></div></div>
   </div>
 
-  <div class="scanner-demo">
-    <div class="scanner-header">
-      <div class="dot red"></div>
-      <div class="dot yellow"></div>
-      <div class="dot green"></div>
-      <span class="scanner-title">aws-security-scanner</span>
+  <div class="term">
+    <div class="termbar"><div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div><span class="termtitle">cloud-security — demo scan</span></div>
+    <div class="termbody" id="termbody">
+      <div><span class="tp">$</span> <span class="tc">python aws/demo_mode.py</span><span class="tcur"></span></div>
+      <div class="tout">Click Execute to run the full pipeline...</div>
     </div>
-    <div class="scanner-body">
-      <button class="scan-btn" onclick="runScan()">Run scan</button>
-      <div class="scan-output" id="scanOutput">
-        <span style="color:#555;font-family:'JetBrains Mono',monospace;font-size:0.82rem">Click "Run scan" to see what the scanner finds...</span>
-      </div>
-    </div>
+  </div>
+  <button class="scanbtn" onclick="runScan()" id="scanbtn"><div class="sdot"></div>Execute scan</button>
+
+  <div class="callout"><div style="font-size:1.2rem;margin-top:2px">💡</div><div><div class="calltitle">No AWS account needed</div><div class="callbody">The demo mode ships with the project and produces realistic findings from mock data. To scan a real AWS account: install boto3, run <code style="font-family:var(--mono);color:var(--aws)">aws configure</code>, then <code style="font-family:var(--mono);color:var(--aws)">python aws/run_all.py</code>.</div></div></div>
+
+  <div class="risk-grid">
+    <div class="risk-card"><div class="risk-service" style="color:var(--aws)">S3</div><div class="risk-title">What gets checked</div><div class="risk-body">Block Public Access, server-side encryption, versioning enabled, access logging active. One misconfiguration can expose everything.</div><span class="risk-badge" style="background:rgba(255,153,0,.08);color:var(--aws);border-color:rgba(255,153,0,.2)">4 checks per bucket</span></div>
+    <div class="risk-card"><div class="risk-service" style="color:var(--red)">IAM</div><div class="risk-title">What gets checked</div><div class="risk-body">Dangerous policies (AdministratorAccess, FullAccess variants), MFA status on console users, access key age against 90-day threshold.</div><span class="risk-badge" style="background:rgba(229,57,53,.08);color:var(--red);border-color:rgba(229,57,53,.2)">3 checks per user</span></div>
+    <div class="risk-card"><div class="risk-service" style="color:var(--orange)">Security Groups</div><div class="risk-title">What gets checked</div><div class="risk-body">Ten dangerous ports checked against 0.0.0.0/0 and ::/0 rules. SSH, RDP, MySQL, PostgreSQL, Redis, MongoDB, FTP, Telnet and more.</div><span class="risk-badge" style="background:rgba(255,109,0,.08);color:var(--orange);border-color:rgba(255,109,0,.2)">10 dangerous ports</span></div>
+    <div class="risk-card"><div class="risk-service" style="color:var(--blue)">CloudTrail</div><div class="risk-title">What gets checked</div><div class="risk-body">Logging enabled, multi-region active, global service events captured, log file validation on. Without all four, investigation gaps exist.</div><span class="risk-badge" style="background:rgba(41,121,255,.08);color:var(--blue);border-color:rgba(41,121,255,.2)">4 configuration checks</span></div>
   </div>
 </div>
 
-<!-- IAM -->
-<div class="section" id="iam">
-  <div class="section-title">IAM — Identity and Access Management</div>
-  <div class="section-intro">
-    IAM is how you control who can do what in AWS. The most common mistake is giving users too much access. Click on each user below to see what is wrong and why it matters.
+<!-- COMPLIANCE -->
+<div class="sec" id="compliance">
+  <div class="slabel">CIS AWS Foundations Benchmark</div>
+  <div class="stitle">Level 1 compliance score</div>
+  <p class="sdesc">The CIS benchmark is what auditors use to assess AWS environments. Level 1 is the essential baseline — every AWS account should pass all 14 controls. This tool calculates your score and tells you exactly what to fix and when.</p>
+
+  <div class="gauge-wrap">
+    <div class="gauge-header">
+      <div>
+        <div class="gauge-score" style="color:#fbbf24" id="gaugeScore">57%</div>
+        <div class="gauge-label">8 of 14 Level 1 controls passing</div>
+      </div>
+      <button onclick="runCompliance()" style="padding:10px 20px;background:var(--s1);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--aws)';this.style.color='var(--aws)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--t1)'">Recalculate →</button>
+    </div>
+    <div class="ctrl-list" id="ctrlList"></div>
   </div>
 
-  <div class="iam-demo">
-    <div class="iam-user bad" onclick="explainIAM('admin')">
-      <div class="iam-name">👤 developer1</div>
-      <div>
-        <span class="iam-policy danger">AdministratorAccess</span>
-      </div>
-      <div class="iam-issue warn">Click to see why this is a problem</div>
-    </div>
-    <div class="iam-user bad" onclick="explainIAM('nomfa')">
-      <div class="iam-name">👤 ci-pipeline</div>
-      <div>
-        <span class="iam-policy safe">S3ReadOnly</span>
-      </div>
-      <div class="iam-issue warn">No MFA enabled</div>
-    </div>
-    <div class="iam-user bad" onclick="explainIAM('oldkey')">
-      <div class="iam-name">👤 backup-service</div>
-      <div>
-        <span class="iam-policy safe">EC2FullAccess</span>
-      </div>
-      <div class="iam-issue warn">Access key is 142 days old</div>
-    </div>
-    <div class="iam-user good" onclick="explainIAM('good')">
-      <div class="iam-name">👤 reports-lambda</div>
-      <div>
-        <span class="iam-policy safe">s3:GetObject on reports/*</span>
-      </div>
-      <div class="iam-issue ok">This is correct</div>
-    </div>
+  <div class="imgrow">
+    <div class="ic"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="Audit"/><div class="icov"><div class="ick" style="color:var(--aws)">Why CIS matters</div><div class="ict">The auditor's standard</div><div class="icb">CIS Level 1 is referenced in every enterprise AWS security assessment. Passing it means your baseline is solid.</div></div></div>
+    <div class="ic"><img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=600&q=80" alt="Report"/><div class="icov"><div class="ick" style="color:var(--green)">Two levels</div><div class="ict">Level 1 vs Level 2</div><div class="icb">Level 1 is the essential baseline. Level 2 adds advanced controls like GuardDuty, VPC flow logs and Config.</div></div></div>
   </div>
-
-  <div id="iamExplain" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;font-size:0.9rem;line-height:1.7"></div>
 </div>
 
-<!-- RISK -->
-<div class="section" id="risk">
-  <div class="section-title">Risk scoring</div>
-  <div class="section-intro">
-    Every security finding gets a risk score. It is calculated by multiplying likelihood by impact. This tells you what to fix first when you cannot fix everything at once.
-  </div>
+<!-- THREAT INTEL -->
+<div class="sec" id="intel">
+  <div class="slabel">Threat Intelligence</div>
+  <div class="stitle">IP reputation lookup</div>
+  <p class="sdesc">When an IP appears in your AWS logs or triggers a security group rule, knowing whether it is a known attacker changes everything about how you respond. Try the demo IPs below.</p>
 
-  <div class="risk-matrix-wrap">
-    <div class="risk-inputs">
-      <div class="risk-input-group">
-        <label>Likelihood: <span id="likelihoodVal">3</span>/5 — <span id="likelihoodLabel">Possible</span></label>
-        <input type="range" class="risk-slider" min="1" max="5" value="3" id="likelihood" oninput="calcRisk()"/>
-      </div>
-      <div class="risk-input-group">
-        <label>Impact: <span id="impactVal">3</span>/5 — <span id="impactLabel">Moderate</span></label>
-        <input type="range" class="risk-slider" min="1" max="5" value="3" id="impact" oninput="calcRisk()"/>
-      </div>
-    </div>
-    <div class="risk-result" id="riskResult">
-      <div class="risk-score-big" id="riskScore" style="color:#ffcc00">9</div>
-      <div class="risk-level-label" id="riskLevel" style="color:#ffcc00">Medium</div>
-      <div class="risk-action" id="riskAction">Fix within 90 days</div>
+  <div class="iplookup">
+    <div class="ipbar"><div class="tdot r"></div><div class="tdot y"></div><div class="tdot g"></div><span style="margin-left:8px">AbuseIPDB — threat intelligence demo</span></div>
+    <div class="ipbody">
+      <div class="iprow"><input class="ipinput" id="ipinput" placeholder="Try: 45.33.32.156 or 8.8.8.8" value="45.33.32.156"/><button class="ipbtn" onclick="checkIP()">Look up →</button></div>
+      <div class="ipres" id="ipres"></div>
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-    <div style="background:rgba(0,119,34,0.15);border:1px solid #007722;border-radius:8px;padding:14px;text-align:center">
-      <div style="color:#00ff41;font-weight:700;font-size:1.1rem">1-4</div>
-      <div style="color:#00ff41;font-size:0.85rem;margin:4px 0">Low</div>
-      <div style="color:#555;font-size:0.78rem">Accept or monitor</div>
-    </div>
-    <div style="background:rgba(187,119,0,0.15);border:1px solid #bb7700;border-radius:8px;padding:14px;text-align:center">
-      <div style="color:#ffcc00;font-weight:700;font-size:1.1rem">5-9</div>
-      <div style="color:#ffcc00;font-size:0.85rem;margin:4px 0">Medium</div>
-      <div style="color:#555;font-size:0.78rem">Fix within 90 days</div>
-    </div>
-    <div style="background:rgba(204,68,0,0.15);border:1px solid #cc4400;border-radius:8px;padding:14px;text-align:center">
-      <div style="color:#ff8800;font-weight:700;font-size:1.1rem">10-16</div>
-      <div style="color:#ff8800;font-size:0.85rem;margin:4px 0">High</div>
-      <div style="color:#555;font-size:0.78rem">Fix within 30 days</div>
-    </div>
-    <div style="background:rgba(204,34,0,0.15);border:1px solid #cc2200;border-radius:8px;padding:14px;text-align:center">
-      <div style="color:#ff4444;font-weight:700;font-size:1.1rem">17-25</div>
-      <div style="color:#ff4444;font-size:0.85rem;margin:4px 0">Critical</div>
-      <div style="color:#555;font-size:0.78rem">Fix immediately</div>
-    </div>
+  <div class="imgrow">
+    <div class="ic"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80" alt="Intel"/><div class="icov"><div class="ick" style="color:var(--aws)">How it works</div><div class="ict">Context changes response</div><div class="icb">A 97% AbuseIPDB score turns a suspicious SSH attempt into a confirmed targeted attack. That changes priority.</div></div></div>
   </div>
 </div>
 
 <!-- CHECKLIST -->
-<div class="section" id="checklist">
-  <div class="section-title">CIS Level 1 checklist</div>
-  <div class="section-intro">
-    The CIS AWS Foundations Benchmark is the standard auditors use. Check off each control to see your coverage. In a real engagement, every unchecked item is a finding.
-  </div>
+<div class="sec" id="checklist">
+  <div class="slabel">Self-assessment</div>
+  <div class="stitle">Cloud security readiness</div>
+  <p class="sdesc">These are the topics that come up in cloud security interviews at both startups and large organisations. Tick what you can explain confidently.</p>
 
-  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
-  <div class="progress-label" id="progressLabel">0 / 10 controls passed</div>
+  <div class="pbwrap"><div class="pbfill" id="pbfill"></div></div>
+  <div class="pblbl" id="pblbl">0 / 12 topics covered</div>
 
-  <ul class="checklist" id="checklist">
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">MFA enabled on root account</div>
-        <div class="check-desc">The root account has unrestricted access to everything in your AWS account. If it gets compromised without MFA, you have no fallback.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">No access keys on root account</div>
-        <div class="check-desc">Root access keys are extremely dangerous. If they are leaked, an attacker has full control of your account. Delete them and use IAM users instead.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">CloudTrail enabled in all regions</div>
-        <div class="check-desc">Without CloudTrail, you have no record of who did what. Attackers know this and sometimes disable it first. Enable it everywhere and protect the logs.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">No S3 buckets are publicly accessible</div>
-        <div class="check-desc">Public S3 buckets are responsible for some of the largest data breaches in history. Enable Block Public Access on every bucket and at the account level.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">SSH (port 22) not open to 0.0.0.0/0</div>
-        <div class="check-desc">SSH open to the entire internet is one of the most scanned configurations on the internet. Restrict it to your IP or a VPN.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">Access keys rotated within 90 days</div>
-        <div class="check-desc">Old access keys are a risk. The longer a key exists, the more chance it has been leaked somewhere. Rotate them every 90 days maximum.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">MFA enabled for all IAM console users</div>
-        <div class="check-desc">Every human user who logs into the AWS console should have MFA. Passwords alone are not enough.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">No inline policies with full admin access</div>
-        <div class="check-desc">Giving a user AdministratorAccess is almost always wrong. Apply least privilege: give users only what they need for their specific job.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">S3 bucket logging enabled</div>
-        <div class="check-desc">Just like CloudTrail, bucket access logs tell you who accessed what and when. Essential for incident investigation.</div>
-      </div>
-    </li>
-    <li class="check-item" onclick="toggleCheck(this)">
-      <div class="check-box"></div>
-      <div class="check-text">
-        <div class="check-title">Unused credentials disabled within 90 days</div>
-        <div class="check-desc">Dormant accounts are a risk. An attacker who finds old credentials can use them months later. Disable anything that has not been used in 90 days.</div>
-      </div>
-    </li>
+  <ul class="clist">
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain the AWS Shared Responsibility Model</div><div class="cd">AWS secures the infrastructure. You secure everything you put on it. Most breaches happen on the customer side.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain why a public S3 bucket is dangerous</div><div class="cd">Anyone on the internet can list and download all objects. No authentication required. This has caused major breaches.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Describe the principle of least privilege in IAM</div><div class="cd">Every user, role and service should have only the minimum permissions needed. Nothing more. AdministratorAccess is almost always wrong.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain why SSH should never be open to 0.0.0.0/0</div><div class="cd">Attackers scan for port 22 on every IP constantly. An exposed SSH port receives brute force attempts within minutes.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain what CloudTrail does and why it matters</div><div class="cd">Records every API call in your account. Without it, you cannot investigate who did what after an incident.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Describe CIS AWS Foundations Benchmark Level 1</div><div class="cd">14 essential security controls covering IAM, logging, storage and networking. The baseline auditors use to assess AWS accounts.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain why access keys should be rotated every 90 days</div><div class="cd">The older a key gets, the more chances it has had to be leaked. 90-day rotation limits the damage window.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Describe what a security group is and how it works</div><div class="cd">Stateful firewall rules attached to AWS resources. Controls which traffic is allowed in and out. Misconfigured groups are a top finding in cloud security assessments.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain what IAM roles are and when to use them</div><div class="cd">Temporary credentials for services and applications. Safer than static access keys because they expire automatically and leave no long-lived secret to rotate.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Describe how to investigate a cloud security incident</div><div class="cd">Start with CloudTrail to build a timeline of API calls. Check which credentials were used, from where, and what they accessed.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Explain encryption at rest vs encryption in transit</div><div class="cd">At rest: data encrypted when stored on disk. In transit: data encrypted over the network (TLS). Both are required for sensitive data.</div></div></li>
+    <li class="ci" onclick="tick(this)"><div class="cbox"></div><div><div class="ct">Describe what MFA does and why it matters for root</div><div class="cd">Multi-factor authentication requires a second device. Root without MFA can be taken over with just a leaked password — which is catastrophic in AWS.</div></div></li>
   </ul>
 </div>
 
-<footer>
-  Built by <a href="https://github.com/Speed-boo3">Speed-boo3</a> as part of a cloud security learning project.
-  Full code at <a href="https://github.com/Speed-boo3/cloud-security">github.com/Speed-boo3/cloud-security</a>
-</footer>
+</div>
+<footer><p>Built by <a href="https://github.com/Speed-boo3">Speed-boo3</a> &nbsp;·&nbsp; <a href="https://github.com/Speed-boo3/cloud-security">github.com/Speed-boo3/cloud-security</a></p></footer>
 
 <script>
-function show(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+/* CANVAS */
+const cv=document.getElementById('bg');const cx=cv.getContext('2d');
+cv.width=window.innerWidth;cv.height=window.innerHeight;
+const pts=[];for(let i=0;i<60;i++)pts.push({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.5+.5,c:Math.random()>.6?'255,153,0':'229,57,53'});
+function drawBg(){cx.clearRect(0,0,cv.width,cv.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(${p.c},.5)`;cx.fill()});pts.forEach((p,i)=>{pts.slice(i+1).forEach(q=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<100){cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.strokeStyle=`rgba(255,255,255,${.03*(1-d/100)})`;cx.lineWidth=.5;cx.stroke()}})});requestAnimationFrame(drawBg)}
+drawBg();window.addEventListener('resize',()=>{cv.width=window.innerWidth;cv.height=window.innerHeight});
+
+/* TICKER */
+const TICKS=[
+  {s:'cr',sl:'CRITICAL',m:'S3 bucket company-backups — Block Public Access disabled'},
+  {s:'cr',sl:'CRITICAL',m:'Security group sg-web — SSH port 22 open to 0.0.0.0/0'},
+  {s:'hi',sl:'HIGH',m:'IAM user developer1 — AdministratorAccess attached'},
+  {s:'hi',sl:'HIGH',m:'IAM user ci-pipeline — MFA not enabled'},
+  {s:'me',sl:'MEDIUM',m:'CloudTrail mgmt-trail — multi-region not configured'},
+  {s:'me',sl:'MEDIUM',m:'IAM user backup-service — access key 143 days old'},
+  {s:'ok',sl:'CLEAN',m:'S3 bucket app-static-assets — all checks passing'},
+  {s:'ok',sl:'INFO',m:'CIS Level 1 score calculated — 57% — 8/14 controls passing'},
+];
+const tr=document.getElementById('ttrack');
+[...TICKS,...TICKS].forEach(t=>{const s=document.createElement('span');s.className='ti';s.innerHTML=`<span class="tsev ${t.s}">${t.sl}</span>${t.m}`;tr.appendChild(s)});
+
+/* COUNTERS */
+document.querySelectorAll('[data-t]').forEach(el=>{const t=+el.dataset.t;let c=0;const st=Math.max(1,Math.ceil(t/40));const tm=setInterval(()=>{c=Math.min(c+st,t);el.textContent=c;if(c>=t)clearInterval(tm)},35)});
+
+/* NAV/TABS */
+function go(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
+  document.querySelectorAll('.tab,.nl').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(id==='compliance')setTimeout(renderCompliance,300);
 }
 
-const FINDINGS = [
-  { level: 'critical', resource: 'company-backups (S3)', finding: 'Block Public Access is not enabled', risk: 'Anyone on the internet can access this bucket', fix: 'Enable Block Public Access on the bucket immediately' },
-  { level: 'critical', resource: 'developer1 (IAM)', finding: 'User has AdministratorAccess policy', risk: 'Full account takeover if credentials are compromised', fix: 'Replace with a scoped policy covering only what this user needs' },
-  { level: 'high', resource: 'sg-web (Security Group)', finding: 'Port 22 (SSH) open to 0.0.0.0/0', risk: 'SSH exposed to the entire internet, constant brute force target', fix: 'Restrict SSH to specific IP addresses or VPN' },
-  { level: 'high', resource: 'app-uploads (S3)', finding: 'Default encryption not configured', risk: 'Files stored in this bucket are not encrypted at rest', fix: 'Enable AES-256 or AWS KMS encryption' },
-  { level: 'medium', resource: 'ci-pipeline (IAM)', finding: 'MFA is not enabled', risk: 'Account can be taken over with just a username and password', fix: 'Enable MFA for this user' },
-  { level: 'medium', resource: 'eu-west-1 (CloudTrail)', finding: 'Logging is disabled in this region', risk: 'No audit trail for activity in this region', fix: 'Enable CloudTrail in all regions' },
-  { level: 'ok', resource: 'reports-lambda (IAM)', finding: 'Scoped policy, MFA enabled, key rotated', risk: 'No issues found', fix: 'No action needed' },
+/* SCANNER */
+const FINDINGS=[
+  {lv:'CRITICAL',cls:'cr',r:'S3 — company-backups-prod',f:'Block Public Access is not fully enabled',risk:'Anyone on the internet can read or download files from this bucket',fix:'Enable all four Block Public Access settings immediately'},
+  {lv:'CRITICAL',cls:'cr',r:'Security Group — web-server-sg',f:'Port 22 (SSH) is open to 0.0.0.0/0',risk:'SSH exposed to every IP address. Constant brute force target with multiple CVEs',fix:'Restrict SSH to your VPN CIDR. Never expose SSH publicly'},
+  {lv:'HIGH',cls:'hi',r:'IAM — developer1',f:'User has AdministratorAccess policy attached',risk:'Full account takeover if credentials are compromised or leaked',fix:'Replace with a scoped policy for this user\'s actual role only'},
+  {lv:'HIGH',cls:'hi',r:'IAM — ci-pipeline',f:'MFA is not enabled on this user',risk:'Account can be taken over with username and password alone',fix:'Enable MFA. For CI/CD pipelines use IAM roles instead of users'},
+  {lv:'MEDIUM',cls:'me',r:'CloudTrail — mgmt-trail',f:'Trail is not configured for multi-region logging',risk:'API activity in other regions leaves no audit trail for investigation',fix:'Enable multi-region logging on the trail'},
+];
+let sc=false;
+function runScan(){
+  if(sc)return;sc=true;
+  const btn=document.getElementById('scanbtn');btn.disabled=true;
+  const tb=document.getElementById('termbody');
+  tb.innerHTML=`<div><span class="tp">$</span> <span class="tc">python aws/demo_mode.py</span></div><div class="tout">Initialising scanners...</div>`;
+  const steps=[
+    ()=>{tb.innerHTML+=`<br/><div class="tout">▶ Scanning S3 buckets...</div>`;},
+    ()=>{tb.innerHTML+=`<div class="tout">▶ Analysing IAM users...</div>`;},
+    ()=>{tb.innerHTML+=`<div class="tout">▶ Scanning security groups...</div>`;},
+    ()=>{tb.innerHTML+=`<div class="tout">▶ Checking CloudTrail...<br/></div>`;},
+  ];
+  steps.forEach((fn,i)=>setTimeout(fn,(i+1)*500));
+  FINDINGS.forEach((f,i)=>{
+    setTimeout(()=>{
+      const d=document.createElement('div');
+      d.className=`fline ${f.cls}`;
+      d.innerHTML=`<div style="font-weight:700;font-size:.75rem">[${f.lv}] &nbsp;${f.r}</div><div class="tout" style="font-size:.73rem">Finding &nbsp;${f.f}</div><div style="color:var(--aws);font-size:.71rem">Fix &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${f.fix}</div>`;
+      tb.appendChild(d);setTimeout(()=>d.classList.add('show'),40);
+      if(i===FINDINGS.length-1){
+        setTimeout(()=>{
+          const s=document.createElement('div');
+          s.style.cssText='opacity:0;margin-top:12px;padding:10px 13px;background:rgba(255,153,0,.06);border:1px solid rgba(255,153,0,.2);border-radius:6px;font-size:.74rem;color:var(--aws);font-family:var(--mono);transition:opacity .4s';
+          s.textContent=`✓  Scan complete — ${FINDINGS.length} issues found — results saved to demo_results.json`;
+          tb.appendChild(s);setTimeout(()=>s.style.opacity='1',50);sc=false;btn.disabled=false;
+        },500);
+      }
+    },2200+(i*750));
+  });
+}
+
+/* COMPLIANCE */
+const CONTROLS=[
+  {id:'1.1',title:'MFA on root account',cat:'IAM',level:'Critical',pass:true},
+  {id:'1.2',title:'No root access keys',cat:'IAM',level:'Critical',pass:true},
+  {id:'1.3',title:'MFA for all IAM console users',cat:'IAM',level:'High',pass:false,deadline:'30 days'},
+  {id:'1.4',title:'Access keys rotated within 90 days',cat:'IAM',level:'Medium',pass:false,deadline:'90 days'},
+  {id:'1.5',title:'No overly permissive policies',cat:'IAM',level:'High',pass:false,deadline:'30 days'},
+  {id:'2.1',title:'CloudTrail in all regions',cat:'Logging',level:'Critical',pass:true},
+  {id:'2.2',title:'Log file validation enabled',cat:'Logging',level:'Medium',pass:true},
+  {id:'2.3',title:'Multi-region trail active',cat:'Logging',level:'Medium',pass:false,deadline:'90 days'},
+  {id:'3.1',title:'S3 Block Public Access enabled',cat:'Storage',level:'Critical',pass:false,deadline:'immediately'},
+  {id:'3.2',title:'S3 buckets encrypted at rest',cat:'Storage',level:'High',pass:true},
+  {id:'3.3',title:'S3 access logging enabled',cat:'Storage',level:'Medium',pass:true},
+  {id:'4.1',title:'SSH not open to 0.0.0.0/0',cat:'Networking',level:'Critical',pass:false,deadline:'immediately'},
+  {id:'4.2',title:'RDP not open to 0.0.0.0/0',cat:'Networking',level:'Critical',pass:true},
+  {id:'4.3',title:'Databases not publicly accessible',cat:'Networking',level:'Critical',pass:true},
 ];
 
-let scanning = false;
-
-function runScan() {
-  if (scanning) return;
-  scanning = true;
-  const out = document.getElementById('scanOutput');
-  out.innerHTML = '<span style="color:#ff9900;font-family:JetBrains Mono,monospace;font-size:0.82rem">Scanning AWS account...</span>';
-
-  setTimeout(() => {
-    out.innerHTML = '';
-    FINDINGS.forEach((f, i) => {
-      setTimeout(() => {
-        const div = document.createElement('div');
-        div.className = `finding ${f.level}`;
-        const colors = { critical: '#ff4444', high: '#ff8800', medium: '#ffcc00', ok: '#00ff41' };
-        const labels = { critical: 'CRITICAL', high: 'HIGH', medium: 'MEDIUM', ok: 'PASSED' };
-        div.innerHTML = `
-          <div class="finding-level ${f.level}">[${labels[f.level]}] ${f.resource}</div>
-          <div class="finding-detail">Finding : ${f.finding}</div>
-          ${f.level !== 'ok' ? `<div class="finding-detail">Risk    : ${f.risk}</div>` : ''}
-          <div class="finding-fix">${f.level !== 'ok' ? 'Fix     : ' + f.fix : f.fix}</div>
-        `;
-        out.appendChild(div);
-        setTimeout(() => div.classList.add('show'), 50);
-
-        if (i === FINDINGS.length - 1) {
-          scanning = false;
-          const summary = document.createElement('div');
-          summary.style.cssText = 'margin-top:16px;padding:14px;background:rgba(255,153,0,0.08);border:1px solid rgba(255,153,0,0.3);border-radius:8px;font-family:JetBrains Mono,monospace;font-size:0.82rem;color:#ff9900';
-          summary.innerHTML = 'Scan complete. Found 6 issues: 2 Critical, 2 High, 2 Medium. Start with the Critical findings.';
-          out.appendChild(summary);
-          setTimeout(() => summary.style.opacity = '1', 50);
-        }
-      }, i * 600);
-    });
-  }, 1200);
+function renderCompliance(){
+  const passing=CONTROLS.filter(c=>c.pass).length;
+  const pct=Math.round(passing/CONTROLS.length*100);
+  const col=pct>=80?'var(--green)':pct>=60?'#fbbf24':'var(--red)';
+  document.getElementById('gaugeScore').textContent=pct+'%';
+  document.getElementById('gaugeScore').style.color=col;
+  const list=document.getElementById('ctrlList');
+  list.innerHTML='';
+  CONTROLS.forEach(c=>{
+    const d=document.createElement('div');
+    d.className=`ctrl-item ${c.pass?'ctrl-pass':'ctrl-fail'}`;
+    const lcol=c.level==='Critical'?'var(--red)':c.level==='High'?'var(--orange)':'#fbbf24';
+    d.innerHTML=`
+      <div class="ctrl-icon">${c.pass?'✅':'❌'}</div>
+      <div class="ctrl-id" style="color:var(--t3)">${c.id}</div>
+      <div class="ctrl-title">${c.title}</div>
+      <div class="ctrl-status" style="color:${c.pass?'var(--green)':lcol}">${c.pass?'PASS':c.level.toUpperCase()}</div>
+      ${!c.pass?`<div class="ctrl-deadline">fix ${c.deadline}</div>`:''}
+    `;
+    list.appendChild(d);
+  });
 }
 
-const IAM_EXPLAINS = {
-  admin: {
-    color: '#ff4444',
-    title: 'AdministratorAccess is almost always wrong',
-    body: 'This gives the user full control of the entire AWS account. If developer1 is ever phished or has their laptop stolen, the attacker can delete everything, create new admin users, read all data and rack up huge costs. The fix is to give this user only the specific permissions they need for their actual job — for example, access to a specific S3 bucket and nothing else.'
-  },
-  nomfa: {
-    color: '#ff8800',
-    title: 'No MFA means one password is all an attacker needs',
-    body: 'Multi-factor authentication requires a second device (like a phone) to log in. Without it, if the password for ci-pipeline is leaked in a data breach elsewhere, an attacker can log into AWS with it immediately. Passwords get leaked all the time. MFA makes leaked passwords useless on their own.'
-  },
-  oldkey: {
-    color: '#ffcc00',
-    title: 'Old access keys are a forgotten risk',
-    body: 'This access key is 142 days old. The older a key gets, the more chances it has had to be accidentally committed to GitHub, included in logs, or leaked in some other way. Rotating keys every 90 days limits the damage window. If a key was leaked 6 months ago and nobody rotated it, an attacker could have been in your account for months.'
-  },
-  good: {
-    color: '#00ff41',
-    title: 'This is what least privilege looks like',
-    body: 'reports-lambda has access to one specific thing: reading objects from the reports/* folder in S3. Nothing else. If this Lambda function is ever compromised, the attacker can only read reports. They cannot write, delete, access other buckets, or touch any other AWS service. This is exactly how IAM should be configured.'
-  }
+function runCompliance(){renderCompliance()}
+renderCompliance();
+
+/* IP LOOKUP */
+const IPDB={
+  '45.33.32.156':{sc:97,rp:312,co:'US',isp:'Linode LLC',ca:'SSH Brute-Force, Port Scan',v:'MALICIOUS'},
+  '185.220.101.45':{sc:100,rp:2847,co:'DE',isp:'Tor Exit Node',ca:'Hacking, DDoS Attack',v:'MALICIOUS'},
+  '198.20.69.74':{sc:89,rp:156,co:'US',isp:'Shodan.io',ca:'Port Scan, Web Attack',v:'MALICIOUS'},
+  '8.8.8.8':{sc:0,rp:0,co:'US',isp:'Google LLC',ca:'None',v:'CLEAN'},
+  '1.1.1.1':{sc:0,rp:0,co:'AU',isp:'Cloudflare',ca:'None',v:'CLEAN'},
 };
-
-function explainIAM(key) {
-  const exp = IAM_EXPLAINS[key];
-  const div = document.getElementById('iamExplain');
-  div.style.display = 'block';
-  div.style.borderColor = exp.color;
-  div.innerHTML = `<div style="color:${exp.color};font-weight:700;margin-bottom:8px">${exp.title}</div><div style="color:#ccc;font-size:0.88rem;line-height:1.7">${exp.body}</div>`;
+function checkIP(){
+  const ip=document.getElementById('ipinput').value.trim();
+  const el=document.getElementById('ipres');el.style.display='block';el.innerHTML='<span style="color:var(--t3)">Querying...</span>';
+  setTimeout(()=>{
+    const d=IPDB[ip];
+    if(!d){el.innerHTML=`[UNKNOWN]  ${ip}\nNo data in demo. Try: 45.33.32.156  ·  185.220.101.45  ·  8.8.8.8`;return}
+    const col=d.sc>=80?'var(--red)':d.sc>=40?'#fbbf24':'var(--green)';
+    el.innerHTML=`<span style="color:${col};font-weight:700">[${d.v}]</span>  ${ip}\n\nAbuse Score  : <span style="color:${col}">${d.sc}%</span>\nTotal Reports: ${d.rp}\nCountry      : ${d.co}\nISP          : ${d.isp}\nCategories   : ${d.ca}\n\n<span style="color:var(--t3)">${d.sc>=80?'Recommended: block at perimeter immediately':d.sc>=40?'Monitor closely — may be a scanner':'No action required'}</span>`;
+  },600);
 }
+document.getElementById('ipinput')?.addEventListener('keydown',e=>{if(e.key==='Enter')checkIP()});
 
-const LIKELIHOOD_LABELS = ['', 'Rare', 'Unlikely', 'Possible', 'Likely', 'Almost certain'];
-const IMPACT_LABELS = ['', 'Negligible', 'Minor', 'Moderate', 'Major', 'Critical'];
-
-function calcRisk() {
-  const l = parseInt(document.getElementById('likelihood').value);
-  const i = parseInt(document.getElementById('impact').value);
-  const score = l * i;
-  document.getElementById('likelihoodVal').textContent = l;
-  document.getElementById('impactVal').textContent = i;
-  document.getElementById('likelihoodLabel').textContent = LIKELIHOOD_LABELS[l];
-  document.getElementById('impactLabel').textContent = IMPACT_LABELS[i];
-  document.getElementById('riskScore').textContent = score;
-  let level, color, action;
-  if (score <= 4) { level = 'Low'; color = '#00ff41'; action = 'Accept or monitor'; }
-  else if (score <= 9) { level = 'Medium'; color = '#ffcc00'; action = 'Fix within 90 days'; }
-  else if (score <= 16) { level = 'High'; color = '#ff8800'; action = 'Fix within 30 days'; }
-  else { level = 'Critical'; color = '#ff4444'; action = 'Fix immediately'; }
-  document.getElementById('riskScore').style.color = color;
-  document.getElementById('riskLevel').textContent = level;
-  document.getElementById('riskLevel').style.color = color;
-  document.getElementById('riskAction').textContent = action;
-  document.getElementById('riskResult').style.borderColor = color;
-}
-
-function toggleCheck(item) {
-  item.classList.toggle('checked');
-  item.querySelector('.check-box').textContent = item.classList.contains('checked') ? '✓' : '';
-  updateProgress();
-}
-
-function updateProgress() {
-  const items = document.querySelectorAll('.check-item');
-  const checked = document.querySelectorAll('.check-item.checked').length;
-  const pct = Math.round((checked / items.length) * 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${checked} / ${items.length} controls passed (${pct}%)`;
+/* CHECKLIST */
+function tick(item){
+  item.classList.toggle('done');item.querySelector('.cbox').textContent=item.classList.contains('done')?'✓':'';
+  const tot=document.querySelectorAll('.ci').length,chk=document.querySelectorAll('.ci.done').length,pct=Math.round(chk/tot*100);
+  document.getElementById('pbfill').style.width=pct+'%';
+  document.getElementById('pblbl').textContent=`${chk} / ${tot} topics covered (${pct}%)`;
 }
 </script>
 </body>
