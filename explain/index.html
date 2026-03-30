@@ -225,6 +225,7 @@ footer a{color:var(--t2);text-decoration:none}footer a:hover{color:var(--t1)}
   <button class="tab" onclick="go('compliance',this)">CIS compliance</button>
   <button class="tab" onclick="go('intel',this)">Threat intel</button>
   <button class="tab" onclick="go('checklist',this)">Self-assess</button>
+  <button class="tab" onclick="go('breach',this)">💰 Breach cost</button>
 </div>
 
 <!-- OVERVIEW -->
@@ -286,9 +287,20 @@ footer a{color:var(--t2);text-decoration:none}footer a:hover{color:var(--t1)}
 
   <div class="gauge-wrap">
     <div class="gauge-header">
-      <div>
-        <div class="gauge-score" style="color:#fbbf24" id="gaugeScore">57%</div>
-        <div class="gauge-label">8 of 14 Level 1 controls passing</div>
+      <div style="display:flex;align-items:center;gap:24px">
+        <!-- Animated SVG ring gauge -->
+        <svg width="110" height="110" viewBox="0 0 110 110" style="flex-shrink:0">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#1e2d45" stroke-width="10"/>
+          <circle id="gaugeRing" cx="55" cy="55" r="46" fill="none" stroke="#fbbf24" stroke-width="10"
+            stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"
+            transform="rotate(-90 55 55)" style="transition:stroke-dashoffset 1.2s ease,stroke .4s"/>
+          <text x="55" y="51" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="22" font-weight="900" fill="#f0f4f8" id="gaugeScore">57%</text>
+          <text x="55" y="67" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#475569">CIS Level 1</text>
+        </svg>
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:#f0f4f8;margin-bottom:4px" id="gaugeLabel">8 of 14 controls passing</div>
+          <div style="font-size:.75rem;color:#475569;font-family:var(--mono)">CIS AWS Foundations Benchmark</div>
+        </div>
       </div>
       <button onclick="runCompliance()" style="padding:10px 20px;background:var(--s1);border:1px solid var(--b2);border-radius:7px;color:var(--t1);font-family:var(--mono);font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--aws)';this.style.color='var(--aws)'" onmouseout="this.style.borderColor='var(--b2)';this.style.color='var(--t1)'">Recalculate →</button>
     </div>
@@ -345,6 +357,126 @@ footer a{color:var(--t2);text-decoration:none}footer a:hover{color:var(--t1)}
   </ul>
 </div>
 
+<!-- BREACH COST CALCULATOR -->
+<div class="sec" id="breach">
+  <div class="slabel">Business impact</div>
+  <div class="stitle">What does a cloud breach actually cost?</div>
+  <p class="sdesc">This is what enterprises care about. A public S3 bucket is not just a security problem — it is a financial and legal one. Adjust the sliders to estimate the real cost of a misconfiguration in your organisation.</p>
+
+  <div style="background:var(--card);border:1px solid var(--b1);border-radius:14px;overflow:hidden;margin-bottom:32px">
+    <!-- Cost result bar -->
+    <div style="background:linear-gradient(135deg,#1a0505,#2d0a0a);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+      <div>
+        <div style="font-size:.65rem;font-family:var(--mono);color:#ff6d00;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">ESTIMATED BREACH COST</div>
+        <div style="font-size:3rem;font-weight:900;font-family:var(--mono);letter-spacing:-2px;color:#fff" id="totalCost">€0</div>
+        <div style="font-size:.78rem;color:#94a3b8;margin-top:4px" id="costLabel">Adjust the sliders below</div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:1.4rem;font-weight:800;font-family:var(--mono);color:#e53935" id="gdprCost">€0</div>
+          <div style="font-size:.68rem;color:#475569;font-family:var(--mono)">GDPR fine</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:1.4rem;font-weight:800;font-family:var(--mono);color:#ff6d00" id="responseCost">€0</div>
+          <div style="font-size:.68rem;color:#475569;font-family:var(--mono)">Incident response</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:1.4rem;font-weight:800;font-family:var(--mono);color:#fbbf24" id="reputationCost">€0</div>
+          <div style="font-size:.68rem;color:#475569;font-family:var(--mono)">Reputation / churn</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sliders -->
+    <div style="padding:28px 32px;display:flex;flex-direction:column;gap:22px">
+
+      <div>
+        <label style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--t2);margin-bottom:8px;font-family:var(--mono)">
+          <span>Records exposed</span>
+          <span id="recordsVal" style="color:var(--aws);font-weight:700">10,000</span>
+        </label>
+        <input type="range" id="records" min="100" max="1000000" value="10000" step="100"
+          style="width:100%;accent-color:var(--aws);cursor:pointer" oninput="calcBreach()"/>
+        <div style="display:flex;justify-content:space-between;font-size:.67rem;color:#475569;font-family:var(--mono);margin-top:4px">
+          <span>100</span><span>100k</span><span>500k</span><span>1M</span>
+        </div>
+      </div>
+
+      <div>
+        <label style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--t2);margin-bottom:8px;font-family:var(--mono)">
+          <span>Data sensitivity</span>
+          <span id="sensitivityVal" style="color:var(--aws);font-weight:700">Personal (GDPR applicable)</span>
+        </label>
+        <select id="sensitivity" onchange="calcBreach()"
+          style="width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;color:var(--t1);font-family:var(--mono);font-size:.78rem;outline:none">
+          <option value="1">Public / non-sensitive</option>
+          <option value="3" selected>Personal data (GDPR applicable)</option>
+          <option value="6">Financial or health data (GDPR special category)</option>
+          <option value="10">Payment card data (PCI-DSS)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--t2);margin-bottom:8px;font-family:var(--mono)">
+          <span>Annual company revenue</span>
+          <span id="revenueVal" style="color:var(--aws);font-weight:700">€10M</span>
+        </label>
+        <input type="range" id="revenue" min="1" max="1000" value="10" step="1"
+          style="width:100%;accent-color:var(--aws);cursor:pointer" oninput="calcBreach()"/>
+        <div style="display:flex;justify-content:space-between;font-size:.67rem;color:#475569;font-family:var(--mono);margin-top:4px">
+          <span>€1M</span><span>€100M</span><span>€500M</span><span>€1B</span>
+        </div>
+      </div>
+
+      <div>
+        <label style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--t2);margin-bottom:8px;font-family:var(--mono)">
+          <span>Time breach was undetected</span>
+          <span id="timeVal" style="color:var(--aws);font-weight:700">30 days</span>
+        </label>
+        <input type="range" id="time" min="1" max="365" value="30"
+          style="width:100%;accent-color:var(--aws);cursor:pointer" oninput="calcBreach()"/>
+        <div style="display:flex;justify-content:space-between;font-size:.67rem;color:#475569;font-family:var(--mono);margin-top:4px">
+          <span>1 day</span><span>1 month</span><span>6 months</span><span>1 year</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Fix cost comparison -->
+    <div style="padding:0 32px 28px">
+      <div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.2);border-radius:10px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-size:.78rem;font-weight:700;color:var(--green);margin-bottom:4px">Cost to fix the misconfiguration</div>
+          <div style="font-size:.78rem;color:#94a3b8">Enable Block Public Access on the S3 bucket</div>
+        </div>
+        <div style="font-size:1.6rem;font-weight:900;font-family:var(--mono);color:var(--green)">€0</div>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:.75rem;color:#475569;font-family:var(--mono)" id="comparisonText">
+        The fix costs nothing. The breach costs everything.
+      </div>
+    </div>
+  </div>
+
+  <!-- Context cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:32px">
+    <div style="background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:20px">
+      <div style="font-size:.65rem;font-family:var(--mono);color:var(--red);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700">GDPR Maximum Fine</div>
+      <div style="font-size:1.3rem;font-weight:800;font-family:var(--mono);margin-bottom:6px">4% of global revenue</div>
+      <div style="font-size:.78rem;color:#94a3b8;line-height:1.6">Or €20M — whichever is higher. For a €100M company a single public S3 bucket could cost €4M in fines alone.</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:20px">
+      <div style="font-size:.65rem;font-family:var(--mono);color:var(--orange);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700">Average Incident Response</div>
+      <div style="font-size:1.3rem;font-weight:800;font-family:var(--mono);margin-bottom:6px">€200–€800/hour</div>
+      <div style="font-size:.78rem;color:#94a3b8;line-height:1.6">A cloud breach typically takes 2–4 weeks to fully contain and remediate. At enterprise rates that is €50k–€300k in response costs alone.</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:20px">
+      <div style="font-size:.65rem;font-family:var(--mono);color:#fbbf24;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700">IBM Cost of a Data Breach 2024</div>
+      <div style="font-size:1.3rem;font-weight:800;font-family:var(--mono);margin-bottom:6px">$4.88M average</div>
+      <div style="font-size:.78rem;color:#94a3b8;line-height:1.6">IBM's annual report places the global average breach cost at $4.88M in 2024. Cloud misconfigurations are among the top three root causes.</div>
+    </div>
+  </div>
+</div>
+
 </div>
 <footer><p>Built by <a href="https://github.com/Speed-boo3">Speed-boo3</a> &nbsp;·&nbsp; <a href="https://github.com/Speed-boo3/cloud-security">github.com/Speed-boo3/cloud-security</a></p></footer>
 
@@ -370,8 +502,18 @@ const TICKS=[
 const tr=document.getElementById('ttrack');
 [...TICKS,...TICKS].forEach(t=>{const s=document.createElement('span');s.className='ti';s.innerHTML=`<span class="tsev ${t.s}">${t.sl}</span>${t.m}`;tr.appendChild(s)});
 
-/* COUNTERS */
-document.querySelectorAll('[data-t]').forEach(el=>{const t=+el.dataset.t;let c=0;const st=Math.max(1,Math.ceil(t/40));const tm=setInterval(()=>{c=Math.min(c+st,t);el.textContent=c;if(c>=t)clearInterval(tm)},35)});
+/* COUNTERS — fire only when element enters viewport */
+function animateCounter(el){
+  const t=+el.dataset.t;
+  if(el._animated)return;
+  el._animated=true;
+  let c=0;const st=Math.max(1,Math.ceil(t/40));
+  const tm=setInterval(()=>{c=Math.min(c+st,t);el.textContent=c;if(c>=t)clearInterval(tm)},35);
+}
+const counterObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)animateCounter(e.target)});
+},{threshold:0.5});
+document.querySelectorAll('[data-t]').forEach(el=>counterObs.observe(el));
 
 /* NAV/TABS */
 function go(id,el){
@@ -443,8 +585,15 @@ function renderCompliance(){
   const passing=CONTROLS.filter(c=>c.pass).length;
   const pct=Math.round(passing/CONTROLS.length*100);
   const col=pct>=80?'var(--green)':pct>=60?'#fbbf24':'var(--red)';
+  // Update text
   document.getElementById('gaugeScore').textContent=pct+'%';
-  document.getElementById('gaugeScore').style.color=col;
+  document.getElementById('gaugeScore').setAttribute('fill',col);
+  document.getElementById('gaugeLabel').textContent=passing+' of '+CONTROLS.length+' controls passing';
+  // Animate ring: circumference=289
+  const ring=document.getElementById('gaugeRing');
+  const offset=289*(1-pct/100);
+  ring.style.stroke=col;
+  setTimeout(()=>{ring.style.strokeDashoffset=offset},100);
   const list=document.getElementById('ctrlList');
   list.innerHTML='';
   CONTROLS.forEach(c=>{
@@ -484,6 +633,56 @@ function checkIP(){
   },600);
 }
 document.getElementById('ipinput')?.addEventListener('keydown',e=>{if(e.key==='Enter')checkIP()});
+
+/* BREACH COST CALCULATOR */
+function fmt(n){
+  if(n>=1000000)return'€'+Math.round(n/100000)/10+'M';
+  if(n>=1000)return'€'+Math.round(n/100)/10+'k';
+  return'€'+Math.round(n);
+}
+
+function calcBreach(){
+  const records=parseInt(document.getElementById('records').value);
+  const sensitivity=parseInt(document.getElementById('sensitivity').value);
+  const revM=parseInt(document.getElementById('revenue').value);
+  const days=parseInt(document.getElementById('time').value);
+
+  document.getElementById('recordsVal').textContent=records.toLocaleString();
+  document.getElementById('revenueVal').textContent='€'+revM+'M';
+  document.getElementById('timeVal').textContent=days===1?'1 day':days<30?days+' days':days<365?Math.round(days/30)+' months':'1 year';
+  document.getElementById('sensitivityVal').textContent=
+    sensitivity===1?'Public / non-sensitive':
+    sensitivity===3?'Personal (GDPR applicable)':
+    sensitivity===6?'Financial or health data':
+    'Payment card data (PCI-DSS)';
+
+  // GDPR fine: per-record cost × sensitivity × revenue cap
+  const perRecord=sensitivity*2.5;
+  const gdprRaw=Math.min(records*perRecord, revM*1000000*0.04, 20000000);
+  const gdpr=gdprRaw*sensitivity;
+
+  // Incident response: days × daily rate × severity
+  const dailyRate=8000;
+  const response=days*dailyRate*(sensitivity/3);
+
+  // Reputation / customer churn
+  const churnRate=records*(sensitivity/100)*50;
+  const reputation=Math.min(churnRate, revM*1000000*0.15);
+
+  const total=gdpr+response+reputation;
+
+  document.getElementById('gdprCost').textContent=fmt(gdpr);
+  document.getElementById('responseCost').textContent=fmt(response);
+  document.getElementById('reputationCost').textContent=fmt(reputation);
+  document.getElementById('totalCost').textContent=fmt(total);
+  document.getElementById('costLabel').textContent=
+    total>1000000?'This is a company-defining event':
+    total>100000?'A significant financial and reputational hit':
+    'Manageable but painful — and entirely preventable';
+  document.getElementById('comparisonText').textContent=
+    'The fix costs nothing. This breach costs '+fmt(total)+'.';
+}
+calcBreach();
 
 /* CHECKLIST */
 function tick(item){
